@@ -1,0 +1,31 @@
+#+TITLE:Tripod, the minimalist/absolutist blog engine
+
+Tripod is a blog engine that you can run on your directory, dynamically hosting all the files from it to be accessible over HTTP(S), Gopher and Gemini, and being processed from a range of formats: HTML, Gemtext, Markdown, for instance. Tripod tries to make hosting a blog as simple as possible, while putting many restrictions on you as a writer to make your content appear nice and accessible on all the supported networks. These restrictions are mostly based on the content-focused wisdom of Gemtext monks, so you most probably should use Gemtext as the default text format for Tripod.
+
+* Getting started
+
+First, clone the repository:
+#+begin_src sh
+  git clone https://github.com/aartaka/tripod
+#+end_src
+
+Then, open the directory it'd been cloned to and build Tripod (ensuring you have all the dependencies):
+#+begin_src sh
+  make all
+#+end_src
+
+After that, you can run Tripod to host your files:
+#+begin_src sh
+  # Start hosting files at Gopher (port 70), Gemini (port 1965) and
+  # HTTP(S) (80/443) with respective certs/
+  ./tripod -d /path/to/your/blog/directory -p 70 -m 1965 -t 80 -s 443 -c /path/to/cert/file -c /path/to/public/key
+#+end_src
+
+
+* Special files
+Tripod uses lots of special files for page structure and content layout. Some are format-specific, some — universal. Here's a rough list:
+- Page structure:
+  - template.html :: An HTML template. Specific to HTML backend, as HTML is much more content-full than Gemini/Gopher and thus needs a bit more styling, fonting, etc. SHOULD have a <head> and <body> with <main>, MAY have a <header> and <footer> (if you use footer.html header.html), the rest is up to you.
+  - footer.XXX :: Footer specific to a certain format.
+  - header.XXX :: Footer specific to a certain format.
+- 404.XXX :: An 404/Page-Not-Found page. Any format is fine, but only one will be used.
