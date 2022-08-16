@@ -81,24 +81,30 @@ Special files:
     (when tripod-directory
       (setf *tripod-directory* (uiop:parse-native-namestring tripod-directory)))
     (when (and gopher-port (numberp gopher-port) (not (zerop gopher-port)))
+      (format t "Starting Gopher handler on port ~d~%" gopher-port)
       (hunchentoot:start (make-instance 'gopher-acceptor :port gopher-port)))
     (when (and http-port (numberp http-port) (not (zerop http-port)))
+      (format t "Starting HTTP handler on port ~d~%" http-port)
       (hunchentoot:start (make-instance 'http-acceptor :port http-port)))
     (when (and https-port (numberp https-port) (not (zerop https-port)))
       (if (and certificate-file key-file)
-          (hunchentoot:start (make-instance 'https-acceptor
-                                            :port https-port
-                                            :ssl-privatekey-file key-file
-                                            :ssl-certificate-file certificate-file))
+          (progn
+            (format t "Starting HTTPS handler on port ~d~%" https-port)
+            (hunchentoot:start (make-instance 'https-acceptor
+                                             :port https-port
+                                             :ssl-privatekey-file key-file
+                                             :ssl-certificate-file certificate-file)))
           (progn
             (warn "Both cert file and key file are required for Tripod HTTPS handler")
             (uiop:quit 1))))
     (when (and gemini-port (numberp gemini-port) (not (zerop gemini-port)))
       (if (and certificate-file key-file)
-          (hunchentoot:start (make-instance 'gemini-acceptor
-                                            :port gemini-port
-                                            :ssl-privatekey-file key-file
-                                            :ssl-certificate-file certificate-file))
+          (progn
+            (format t "Starting Gemini handler on port ~d~%" gemini-port)
+            (hunchentoot:start (make-instance 'gemini-acceptor
+                                              :port gemini-port
+                                              :ssl-privatekey-file key-file
+                                              :ssl-certificate-file certificate-file)))
           (progn
             (warn "Both cert file and key file are required for Tripod Gemini handler")
             (uiop:quit 1))))
