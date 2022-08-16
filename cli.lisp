@@ -10,6 +10,26 @@
         (uiop:getenv env))
       default))
 
+(defun start-https (https-port certificate-file key-file)
+  (if (and certificate-file key-file)
+      (progn
+        (format t "Starting HTTPS handler on port ~d~%" https-port)
+        (hunchentoot:start (make-instance 'https-acceptor
+                                          :port https-port
+                                          :ssl-privatekey-file key-file
+                                          :ssl-certificate-file certificate-file)))
+      (error "Both cert file and key file are required for Tripod HTTPS handler")))
+
+(defun start-gemini (gemini-port certificate-file key-file)
+  (if (and certificate-file key-file)
+      (progn
+        (format t "Starting Gemini handler on port ~d~%" gemini-port)
+        (hunchentoot:start (make-instance 'gemini-acceptor
+                                          :port gemini-port
+                                          :ssl-privatekey-file key-file
+                                          :ssl-certificate-file certificate-file)))
+      (error "Both cert file and key file are required for Tripod Gemini handler")))
+
 (defun entry-point ()
   (let* ((help-p (get-cli-arg-or-env
                   :arg "-h" :long-arg "--help"))
@@ -87,21 +107,7 @@ Special files:
       (format t "Starting HTTP handler on port ~d~%" http-port)
       (hunchentoot:start (make-instance 'http-acceptor :port http-port)))
     (when (and https-port (numberp https-port) (not (zerop https-port)))
-      (if (and certificate-file key-file)
-          (progn
-            (format t "Starting HTTPS handler on port ~d~%" https-port)
-            (hunchentoot:start (make-instance 'https-acceptor
-                                             :port https-port
-                                             :ssl-privatekey-file key-file
-                                             :ssl-certificate-file certificate-file)))
-          (error "Both cert file and key file are required for Tripod HTTPS handler")))
-    ;; (when (and gemini-port (numberp gemini-port) (not (zerop gemini-port)))
-    ;;   (if (and certificate-file key-file)
-    ;;       (progn
-    ;;         (format t "Starting Gemini handler on port ~d~%" gemini-port)
-    ;;         (hunchentoot:start (make-instance 'gemini-acceptor
-    ;;                                           :port gemini-port
-    ;;                                           :ssl-privatekey-file key-file
-    ;;                                           :ssl-certificate-file certificate-file)))
-    ;;       (error "Both cert file and key file are required for Tripod Gemini handler")))
+      (start-https https-port certificate-file key-file))
+    (when (and gemini-port (numberp gemini-port) (not (zerop gemini-port)))
+      (start-gemini gemini-port certificate-file key-file))
     (loop)))
