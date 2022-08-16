@@ -1,11 +1,11 @@
 (in-package #:tripod)
 
 (defun get-cli-arg-or-env (&key arg long-arg env default)
-  (or (second (member arg uiop:*command-line-arguments* :test #'string-equal))
-      (not (not (member arg uiop:*command-line-arguments* :test #'string-equal)))
+  (or (second (member arg uiop:*command-line-arguments* :test #'string=))
+      (not (not (member arg uiop:*command-line-arguments* :test #'string=)))
       (when long-arg
-        (or (second (member long-arg uiop:*command-line-arguments* :test #'string-equal))
-            (not (not (member long-arg uiop:*command-line-arguments* :test #'string-equal)))))
+        (or (second (member long-arg uiop:*command-line-arguments* :test #'string=))
+            (not (not (member long-arg uiop:*command-line-arguments* :test #'string=)))))
       (when env
         (uiop:getenv env))
       default))
