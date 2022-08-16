@@ -41,22 +41,26 @@
                        (parse-integer
                         (get-cli-arg-or-env
                          :arg "-p" :long-arg "--gopher"
-                         :env "TRIPOD_GOPHER_PORT"))))
+                         :env "TRIPOD_GOPHER_PORT")
+                        :junk-allowed nil)))
          (gemini-port (ignore-errors
                        (parse-integer
                         (get-cli-arg-or-env
                          :arg "-m" :long-arg "--gemini"
-                         :env "TRIPOD_GEMINI_PORT"))))
+                         :env "TRIPOD_GEMINI_PORT")
+                        :junk-allowed nil)))
          (http-port (ignore-errors
                      (parse-integer
                       (get-cli-arg-or-env
                        :arg "-t" :long-arg "--http"
-                       :env "TRIPOD_HTTP_PORT"))))
+                       :env "TRIPOD_HTTP_PORT")
+                      :junk-allowed nil)))
          (https-port (ignore-errors
                       (parse-integer
                        (get-cli-arg-or-env
                         :arg "-s" :long-arg "--https"
-                        :env "TRIPOD_HTTPS_PORT"))))
+                        :env "TRIPOD_HTTPS_PORT")
+                       :junk-allowed nil)))
          (certificate-file (get-cli-arg-or-env
                             :arg "-c" :long-arg "--cert"))
          (key-file (get-cli-arg-or-env
