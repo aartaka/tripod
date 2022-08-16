@@ -30,8 +30,7 @@
                      (parse-integer
                       (get-cli-arg-or-env
                        :arg "-t" :long-arg "--http"
-                       :env "TRIPOD_HTTP_PORT"
-                       :default "80"))))
+                       :env "TRIPOD_HTTP_PORT"))))
          (https-port (ignore-errors
                       (parse-integer
                        (get-cli-arg-or-env
