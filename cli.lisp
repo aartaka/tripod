@@ -88,7 +88,7 @@ Special files:
           (hunchentoot:start (make-instance 'https-acceptor
                                             :port https-port
                                             :ssl-privatekey-file key-file
-                                            :ssl-cert-file certificate-file))
+                                            :ssl-certificate-file certificate-file))
           (progn
             (warn "Both cert file and key file are required for Tripod HTTPS handler")
             (uiop:quit 1))))
@@ -97,7 +97,7 @@ Special files:
           (hunchentoot:start (make-instance 'gemini-acceptor
                                             :port gemini-port
                                             :ssl-privatekey-file key-file
-                                            :ssl-cert-file certificate-file))
+                                            :ssl-certificate-file certificate-file))
           (progn
             (warn "Both cert file and key file are required for Tripod Gemini handler")
             (uiop:quit 1))))
