@@ -2,15 +2,17 @@
 
 (defun get-cli-arg-or-env (&key arg long-arg env default)
   (or (second (member arg uiop:*command-line-arguments* :test #'string-equal))
+      (not (not (member arg uiop:*command-line-arguments* :test #'string-equal)))
       (when long-arg
-        (second (member long-arg uiop:*command-line-arguments* :test #'string-equal)))
+        (or (second (member long-arg uiop:*command-line-arguments* :test #'string-equal))
+            (not (not (member long-arg uiop:*command-line-arguments* :test #'string-equal)))))
       (when env
         (uiop:getenv env))
       default))
 
 (defun entry-point ()
-  (let* ((help-p (not (not (get-cli-arg-or-env
-                            :arg "-h" :long-arg "--help"))))
+  (let* ((help-p (get-cli-arg-or-env
+                  :arg "-h" :long-arg "--help"))
          (tripod-directory (get-cli-arg-or-env
                             :arg "-d" :long-arg "--dir"
                             :env "TRIPOD_DIR"))
