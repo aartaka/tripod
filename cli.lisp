@@ -95,13 +95,13 @@ Special files:
                                              :ssl-privatekey-file key-file
                                              :ssl-certificate-file certificate-file)))
           (error "Both cert file and key file are required for Tripod HTTPS handler")))
-    (when (and gemini-port (numberp gemini-port) (not (zerop gemini-port)))
-      (if (and certificate-file key-file)
-          (progn
-            (format t "Starting Gemini handler on port ~d~%" gemini-port)
-            (hunchentoot:start (make-instance 'gemini-acceptor
-                                              :port gemini-port
-                                              :ssl-privatekey-file key-file
-                                              :ssl-certificate-file certificate-file)))
-          (error "Both cert file and key file are required for Tripod Gemini handler")))
+    ;; (when (and gemini-port (numberp gemini-port) (not (zerop gemini-port)))
+    ;;   (if (and certificate-file key-file)
+    ;;       (progn
+    ;;         (format t "Starting Gemini handler on port ~d~%" gemini-port)
+    ;;         (hunchentoot:start (make-instance 'gemini-acceptor
+    ;;                                           :port gemini-port
+    ;;                                           :ssl-privatekey-file key-file
+    ;;                                           :ssl-certificate-file certificate-file)))
+    ;;       (error "Both cert file and key file are required for Tripod Gemini handler")))
     (loop)))
