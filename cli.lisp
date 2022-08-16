@@ -1,14 +1,15 @@
 (in-package #:tripod)
 
 (defun get-cli-arg-or-env (&key arg long-arg env default)
-  (or (second (member arg uiop:*command-line-arguments* :test #'string=))
-      (not (not (member arg uiop:*command-line-arguments* :test #'string=)))
-      (when long-arg
-        (or (second (member long-arg uiop:*command-line-arguments* :test #'string=))
-            (not (not (member long-arg uiop:*command-line-arguments* :test #'string=)))))
-      (when env
-        (uiop:getenv env))
-      default))
+  (let ((args (uiop:command-line-arguments)))
+    (or (second (member arg args :test #'string=))
+        (not (not (member arg args :test #'string=)))
+        (when long-arg
+          (or (second (member long-arg args :test #'string=))
+              (not (not (member long-arg args :test #'string=)))))
+        (when env
+          (uiop:getenv env))
+        default)))
 
 (defun start-https (https-port certificate-file key-file)
   (if (and certificate-file key-file)
