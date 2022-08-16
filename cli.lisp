@@ -94,9 +94,7 @@ Special files:
                                              :port https-port
                                              :ssl-privatekey-file key-file
                                              :ssl-certificate-file certificate-file)))
-          (progn
-            (warn "Both cert file and key file are required for Tripod HTTPS handler")
-            (uiop:quit 1))))
+          (error "Both cert file and key file are required for Tripod HTTPS handler")))
     (when (and gemini-port (numberp gemini-port) (not (zerop gemini-port)))
       (if (and certificate-file key-file)
           (progn
@@ -105,7 +103,5 @@ Special files:
                                               :port gemini-port
                                               :ssl-privatekey-file key-file
                                               :ssl-certificate-file certificate-file)))
-          (progn
-            (warn "Both cert file and key file are required for Tripod Gemini handler")
-            (uiop:quit 1))))
+          (error "Both cert file and key file are required for Tripod Gemini handler")))
     (loop)))
