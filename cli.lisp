@@ -81,11 +81,11 @@ Special files:
       (uiop:quit 0))
     (when tripod-directory
       (setf *tripod-directory* (uiop:parse-native-namestring tripod-directory)))
-    (when (and gopher-port (not (zerop gopher-port)))
+    (when (and gopher-port (numberp gopher-port) (not (zerop gopher-port)))
       (hunchentoot:start (make-instance 'gopher-acceptor :port gopher-port)))
-    (when (and http-port (not (zerop http-port)))
+    (when (and http-port (numberp http-port) (not (zerop http-port)))
       (hunchentoot:start (make-instance 'http-acceptor :port http-port)))
-    (when (and https-port (not (zerop https-port)))
+    (when (and https-port (numberp https-port) (not (zerop https-port)))
       (if (and certificate-file key-file)
           (hunchentoot:start (make-instance 'https-acceptor
                                             :port https-port
@@ -94,7 +94,7 @@ Special files:
           (progn
             (warn "Both cert file and key file are required for Tripod HTTPS handler")
             (uiop:quit 1))))
-    (when (and gemini-port (not (zerop gemini-port)))
+    (when (and gemini-port (numberp gemini-port) (not (zerop gemini-port)))
       (if (and certificate-file key-file)
           (hunchentoot:start (make-instance 'gemini-acceptor
                                             :port gemini-port
