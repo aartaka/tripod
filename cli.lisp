@@ -37,30 +37,30 @@
          (tripod-directory (get-cli-arg-or-env
                             :arg "-d" :long-arg "--dir"
                             :env "TRIPOD_DIR"))
-         (gemini-port (the integer
-                           (parse-integer
-                            (get-cli-arg-or-env
-                             :arg "-m" :long-arg "--gemini"
-                             :env "TRIPOD_GEMINI_PORT")
-                            :junk-allowed t)))
-         (gopher-port (the integer
-                           (parse-integer
-                            (get-cli-arg-or-env
-                             :arg "-p" :long-arg "--gopher"
-                             :env "TRIPOD_GOPHER_PORT")
-                            :junk-allowed t)))
-         (http-port (the integer
-                         (parse-integer
-                          (get-cli-arg-or-env
-                           :arg "-t" :long-arg "--http"
-                           :env "TRIPOD_HTTP_PORT")
-                          :junk-allowed t)))
-         (https-port (the integer
-                          (parse-integer
-                           (get-cli-arg-or-env
-                            :arg "-s" :long-arg "--https"
-                            :env "TRIPOD_HTTPS_PORT")
-                           :junk-allowed t)))
+         (gemini-port (parse-integer
+                       (or (get-cli-arg-or-env
+                            :arg "-m" :long-arg "--gemini"
+                            :env "TRIPOD_GEMINI_PORT")
+                           "")
+                       :junk-allowed t))
+         (gopher-port (parse-integer
+                       (or (get-cli-arg-or-env
+                            :arg "-p" :long-arg "--gopher"
+                            :env "TRIPOD_GOPHER_PORT")
+                           "")
+                       :junk-allowed t))
+         (http-port (parse-integer
+                     (or (get-cli-arg-or-env
+                          :arg "-t" :long-arg "--http"
+                          :env "TRIPOD_HTTP_PORT")
+                         "")
+                     :junk-allowed t))
+         (https-port (parse-integer
+                      (or (get-cli-arg-or-env
+                           :arg "-s" :long-arg "--https"
+                           :env "TRIPOD_HTTPS_PORT")
+                          "")
+                      :junk-allowed t))
          (certificate-file (get-cli-arg-or-env
                             :arg "-c" :long-arg "--cert"))
          (key-file (get-cli-arg-or-env
