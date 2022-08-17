@@ -105,16 +105,14 @@ Special files:
       (uiop:quit 0))
     (when tripod-directory
       (setf *tripod-directory* (uiop:parse-native-namestring tripod-directory)))
-    (when (and gopher-port (not (null gopher-port))
-               (numberp gopher-port) (not (zerop gopher-port)))
+    (when gopher-port
       (format t "Starting Gopher handler on port ~d~%" gopher-port)
       (hunchentoot:start (make-instance 'gopher-acceptor :port gopher-port)))
-    (when (and http-port (not (null http-port))
-               (numberp http-port) (not (zerop http-port)))
+    (when http-port
       (format t "Starting HTTP handler on port ~d~%" http-port)
       (hunchentoot:start (make-instance 'http-acceptor :port http-port)))
-    ;; (when (and https-port (numberp https-port) (not (zerop https-port)))
-    ;;   (start-https https-port certificate-file key-file))
-    ;; (when (and gemini-port (numberp gemini-port) (not (zerop gemini-port)))
-    ;;   (start-gemini gemini-port certificate-file key-file))
+    (when https-port
+      (start-https https-port certificate-file key-file))
+    (when gemini-port
+      (start-gemini gemini-port certificate-file key-file))
     (loop)))
