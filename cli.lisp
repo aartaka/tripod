@@ -114,5 +114,4 @@ Special files:
     (when https-port
       (start-https https-port certificate-file key-file))
     (when gemini-port
-      (start-gemini gemini-port certificate-file key-file))
-    (loop)))
+      (start-gemini gemini-port certificate-file key-file))))
