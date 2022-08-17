@@ -113,6 +113,6 @@ Special files:
       (hunchentoot:start (make-instance 'http-acceptor :port http-port)))
     (when (and https-port (numberp https-port) (not (zerop https-port)))
       (start-https https-port certificate-file key-file))
-    (when (and gemini-port (numberp gemini-port) (not (zerop gemini-port)))
-      (start-gemini gemini-port certificate-file key-file))
+    ;; (when (and gemini-port (numberp gemini-port) (not (zerop gemini-port)))
+    ;;   (start-gemini gemini-port certificate-file key-file))
     (loop)))
