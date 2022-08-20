@@ -144,6 +144,7 @@
 
 (hunchentoot:define-easy-handler
     (process-files
+     :uri (constantly t)
      :default-request-type :get)
     ()
   (or
