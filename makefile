@@ -16,10 +16,16 @@ clean:
 
 ifeq ($(QUICKLISP), true)
 tripod:
-	$(LISP) $(LISP_FLAGS) --eval '(require "asdf")' --load tripod.asd --eval '(ql:quickload :tripod)' --eval '(asdf:make :tripod)' --eval '(quit)'
+	$(LISP) $(LISP_FLAGS) --eval '(require "asdf")' \
+	--load tripod.asd --eval '(ql:quickload :tripod)' \
+	--eval '(asdf:make :tripod)' \
+	--eval '(quit)'
 else
 tripod:
-	$(LISP) $(LISP_FLAGS) --eval '(require "asdf")' --load tripod.asd --eval '(asdf:load-system :tripod)' --eval '(asdf:make :tripod)' --eval '(quit)'
+	$(LISP) $(LISP_FLAGS) --eval '(require "asdf")' \
+	--load tripod.asd --eval '(asdf:load-system :tripod)' \
+	--eval '(asdf:make :tripod)' \
+	--eval '(quit)'
 endif
 
 
