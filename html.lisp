@@ -136,7 +136,7 @@
    :address "127.0.0.1"
    :port 80))
 
-(defclass https-acceptor (hunchentoot:easy-ssl-acceptor http-acceptor)
+(defclass https-acceptor (hunchentoot:easy-ssl-acceptor)
   ()
   (:default-initargs
    :address "127.0.0.1"
