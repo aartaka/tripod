@@ -98,8 +98,7 @@
       (when first-paragraph
         (let ((description (plump:make-element head "meta")))
           (plump:set-attribute description "name" "description")
-          (plump:set-attribute description "content" (text first-paragraph))
-          (plump:append-child head description)))
+          (plump:set-attribute description "content" (text first-paragraph))))
       (when header-contents
         (loop for header-elem across (plump:children header-contents)
               do (plump:append-child header header-elem)))
