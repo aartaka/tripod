@@ -64,7 +64,8 @@
          (certificate-file (get-cli-arg-or-env
                             :arg "-c" :long-arg "--cert"))
          (key-file (get-cli-arg-or-env
-                    :arg "-k" :long-arg "--key")))
+                    :arg "-k" :long-arg "--key"))
+         (acceptors nil))
     (when help-p
       (format t "Tripod is a minimalist/absolutist blog engine.
 
@@ -107,11 +108,30 @@ Special files:
       (setf *tripod-directory* (uiop:parse-native-namestring tripod-directory)))
     (when gopher-port
       (format t "Starting Gopher handler on port ~d~%" gopher-port)
-      (hunchentoot:start (make-instance 'gopher-acceptor :port gopher-port)))
+      (push (hunchentoot:start (make-instance 'gopher-acceptor :port gopher-port))
+            acceptors))
     (when http-port
       (format t "Starting HTTP handler on port ~d~%" http-port)
-      (hunchentoot:start (make-instance 'http-acceptor :port http-port)))
+      (push (hunchentoot:start (make-instance 'http-acceptor :port http-port))
+            acceptors))
     (when https-port
-      (start-https https-port certificate-file key-file))
+      (push (start-https https-port certificate-file key-file)
+            acceptors))
     (when gemini-port
-      (start-gemini gemini-port certificate-file key-file))))
+      (push (start-gemini gemini-port certificate-file key-file)
+            acceptors))
+    (handler-case (bt:join-thread (find-if (lambda (th)
+                                             (search "hunchentoot" (bt:thread-name th)))
+                                           (bt:all-threads)))
+      (#+sbcl sb-sys:interactive-interrupt
+       #+ccl  ccl:interrupt-signal-condition
+       #+clisp system::simple-interrupt-condition
+       #+ecl ext:interactive-interrupt
+       #+allegro excl:interrupt-signal
+       ()
+        (format *error-output* "Aborting.~&")
+        (mapcar #'hunchentoot:stop acceptors)
+        (uiop:quit))
+      (error (c)
+        (format t "An unknown error occured:~&~a~&" c)
+        (uiop:print-backtrace :condition c)))))
