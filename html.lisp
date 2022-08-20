@@ -108,7 +108,9 @@
       (dolist (node nodes)
         ;; FIXME: Generate elements in separate `tripod->backend' methods?
         (typecase node
-          (paragraph (make-with-text main "p" (text node)))
+          (paragraph (if (uiop:emptyp (text node))
+                         (plump:make-element main "br")
+                         (make-with-text main "p" (text node))))
           (blockquote (make-with-text main "q" (text node)))
           (heading (let ((heading (plump:make-element
                                    main (case (level node) (1 "h1") (2 "h2") (3 "h3")))))
