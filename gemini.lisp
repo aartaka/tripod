@@ -113,9 +113,12 @@
                               with vec = (make-array 0 :element-type '(unsigned-byte 8)
                                                        :adjustable t :fill-pointer 0)
                               for char = (read-byte stream) and prev = char
-                              until (= char (char-code #\newline))
+                              until (and (= char (char-code #\newline))
+                                         (= prev (char-code #\return)))
                               do (vector-push-extend char vec)
-                              finally (return (flex:octets-to-string vec :external-format :utf-8)))))
+                              finally (progn
+                                        (vector-pop vec)
+                                        (return (flex:octets-to-string vec :external-format :utf-8))))))
          (path (resolve-path (quri:uri-path url)))
          (mime-type (mimes:mime path))
          (tripod (ignore-errors (file->tripod path (path-backend path)))))
