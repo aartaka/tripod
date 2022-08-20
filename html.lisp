@@ -144,8 +144,8 @@
 
 (hunchentoot:define-easy-handler
     (process-files
-     :uri (constantly t)
-     :default-request-type :get)
+     :default-request-type :get
+     :acceptor-names '(http-acceptor https-acceptor))
     ()
   (or
    (alexandria:when-let* ((path (ignore-errors (resolve-path (hunchentoot:script-name hunchentoot:*request*)))))
