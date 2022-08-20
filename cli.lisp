@@ -11,21 +11,23 @@
           (uiop:getenv env))
         default)))
 
-(defun start-https (https-port certificate-file key-file)
+(defun start-https (address https-port certificate-file key-file)
   (if (and certificate-file key-file)
       (progn
         (format t "Starting HTTPS handler on port ~d~%" https-port)
         (hunchentoot:start (make-instance 'https-acceptor
+                                          :address address
                                           :port https-port
                                           :ssl-privatekey-file key-file
                                           :ssl-certificate-file certificate-file)))
       (error "Both cert file and key file are required for Tripod HTTPS handler")))
 
-(defun start-gemini (gemini-port certificate-file key-file)
+(defun start-gemini (address gemini-port certificate-file key-file)
   (if (and certificate-file key-file)
       (progn
         (format t "Starting Gemini handler on port ~d~%" gemini-port)
         (hunchentoot:start (make-instance 'gemini-acceptor
+                                          :address address
                                           :port gemini-port
                                           :ssl-privatekey-file key-file
                                           :ssl-certificate-file certificate-file)))
@@ -34,6 +36,8 @@
 (defun entry-point ()
   (let* ((help-p (get-cli-arg-or-env
                   :arg "-h" :long-arg "--help"))
+         (address (get-cli-arg-or-env
+                   :arg "-a" :long-arg "--addr"))
          (tripod-directory (get-cli-arg-or-env
                             :arg "-d" :long-arg "--dir"
                             :env "TRIPOD_DIR"))
@@ -87,6 +91,7 @@ Usage:
 Flag~13tArg~20tEnvironment~40tDescription
 --help/-h~40tShow this help message.
 --dir/-d~13tDIR~20tTRIPOD_DIR~40tDirectory with the website content.
+--address/-a~13tIP~40tThe IP address of the server website is hosted on.
 --gopher/-p~13tPORT~20tTRIPOD_GOPHER_PORT~40tThe port to host Gopher content on.
 --gemini/-m~13tPORT~20tTRIPOD_GEMINI_PORT~40tThe port for Gemini content.
 --http/-t~13tPORT~20tTRIPOD_HTTP_PORT~40tThe HTTP port.
@@ -108,17 +113,17 @@ Special files:
       (setf *tripod-directory* (uiop:parse-native-namestring tripod-directory)))
     (when gopher-port
       (format t "Starting Gopher handler on port ~d~%" gopher-port)
-      (push (hunchentoot:start (make-instance 'gopher-acceptor :port gopher-port))
+      (push (hunchentoot:start (make-instance 'gopher-acceptor :port gopher-port :address address))
             acceptors))
     (when http-port
       (format t "Starting HTTP handler on port ~d~%" http-port)
-      (push (hunchentoot:start (make-instance 'http-acceptor :port http-port))
+      (push (hunchentoot:start (make-instance 'http-acceptor :port http-port :address address))
             acceptors))
     (when https-port
-      (push (start-https https-port certificate-file key-file)
+      (push (start-https address https-port certificate-file key-file)
             acceptors))
     (when gemini-port
-      (push (start-gemini gemini-port certificate-file key-file)
+      (push (start-gemini address gemini-port certificate-file key-file)
             acceptors))
     (handler-case (bt:join-thread (find-if (lambda (th)
                                              (search "hunchentoot" (bt:thread-name th)))
