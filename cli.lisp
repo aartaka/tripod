@@ -11,28 +11,6 @@
           (uiop:getenv env))
         default)))
 
-(defun start-https (address https-port certificate-file key-file)
-  (if (and certificate-file key-file)
-      (progn
-        (format t "Starting HTTPS handler on port ~d~%" https-port)
-        (hunchentoot:start (make-instance 'https-acceptor
-                                          :address address
-                                          :port https-port
-                                          :ssl-privatekey-file key-file
-                                          :ssl-certificate-file certificate-file)))
-      (error "Both cert file and key file are required for Tripod HTTPS handler")))
-
-(defun start-gemini (address gemini-port certificate-file key-file)
-  (if (and certificate-file key-file)
-      (progn
-        (format t "Starting Gemini handler on port ~d~%" gemini-port)
-        (hunchentoot:start (make-instance 'gemini-acceptor
-                                          :address address
-                                          :port gemini-port
-                                          :ssl-privatekey-file key-file
-                                          :ssl-certificate-file certificate-file)))
-      (error "Both cert file and key file are required for Tripod Gemini handler")))
-
 (defun entry-point ()
   (let* ((help-p (get-cli-arg-or-env
                   :arg "-h" :long-arg "--help"))
@@ -41,6 +19,9 @@
          (tripod-directory (get-cli-arg-or-env
                             :arg "-d" :long-arg "--dir"
                             :env "TRIPOD_DIR"))
+         (log-file (get-cli-arg-or-env
+                    :arg "-l" :long-arg "--log"
+                    :env "TRIPOD_LOG_FILE"))
          (gemini-port (parse-integer
                        (or (get-cli-arg-or-env
                             :arg "-m" :long-arg "--gemini"
@@ -70,6 +51,8 @@
          (key-file (get-cli-arg-or-env
                     :arg "-k" :long-arg "--key"))
          (acceptors nil))
+    (when log-file
+      (uiop:ensure-all-directories-exist (list (uiop:pathname-directory-pathname log-file))))
     (when help-p
       (format t "Tripod is a minimalist/absolutist blog engine.
 
@@ -113,17 +96,33 @@ Special files:
       (setf *tripod-directory* (uiop:parse-native-namestring tripod-directory)))
     (when gopher-port
       (format t "Starting Gopher handler on port ~d~%" gopher-port)
-      (push (hunchentoot:start (make-instance 'gopher-acceptor :port gopher-port :address address))
+      (push (hunchentoot:start (make-instance 'gopher-acceptor
+                                              :port gopher-port
+                                              :address address
+                                              :message-log-destination (or log-file *standard-output*)))
             acceptors))
     (when http-port
       (format t "Starting HTTP handler on port ~d~%" http-port)
-      (push (hunchentoot:start (make-instance 'http-acceptor :port http-port :address address))
+      (push (hunchentoot:start (make-instance 'http-acceptor
+                                              :port http-port
+                                              :address address
+                                              :message-log-destination (or log-file *standard-output*)))
             acceptors))
-    (when https-port
-      (push (start-https address https-port certificate-file key-file)
+    (when (and https-port key-file certificate-file)
+      (push (hunchentoot:start (make-instance 'https-acceptor
+                                              :address address
+                                              :port https-port
+                                              :ssl-privatekey-file key-file
+                                              :ssl-certificate-file certificate-file
+                                              :message-log-destination (or log-file *standard-output*)))
             acceptors))
-    (when gemini-port
-      (push (start-gemini address gemini-port certificate-file key-file)
+    (when (and gemini-port key-file certificate-file)
+      (push (hunchentoot:start (make-instance 'gemini-acceptor
+                                              :address address
+                                              :port gemini-port
+                                              :ssl-privatekey-file key-file
+                                              :ssl-certificate-file certificate-file
+                                              :message-log-destination (or log-file *standard-output*)))
             acceptors))
     (handler-case (bt:join-thread (find-if (lambda (th)
                                              (search "hunchentoot" (bt:thread-name th)))
