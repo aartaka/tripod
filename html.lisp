@@ -146,30 +146,35 @@
    :address "127.0.0.1"
    :port 443))
 
+(defun respond-regular-page (script-name)
+  (alexandria:when-let* ((path (ignore-errors (resolve-path ))))
+    (setf (hunchentoot:content-type*) "text/html")
+    (let ((out (hunchentoot:send-headers))
+          (content (tripod->backend (path->tripod* path (path-backend path)) :html)))
+      (write-sequence (flex:string-to-octets (plump:serialize content nil) :external-format :utf8) out))
+    t))
+
+(defun respond-404-page ()
+  (setf (hunchentoot:content-type*) "text/html"
+        (hunchentoot:return-code*) hunchentoot:+http-not-found+)
+  (let* ((out (hunchentoot:send-headers))
+         (404-path (resolve-path "404"))
+         (content (if 404-path
+                      (tripod->backend (path->tripod* 404-path (path-backend 404-path)) :html)
+                      (tripod->backend
+                       (list (make-instance 'heading :level 1 :text "Sorry, there's no such page")
+                             (make-instance
+                              'paragraph
+                              :text "It seems the page you're looking for is not there.
+Please, check the address again."))
+                       :html))))
+    (write-sequence (flex:string-to-octets (plump:serialize content nil) :external-format :utf8) out)))
+
 (hunchentoot:define-easy-handler
     (process-files
      :uri (constantly t)
      :default-request-type :get)
     ()
   (or
-   (alexandria:when-let* ((path (ignore-errors (resolve-path (hunchentoot:script-name hunchentoot:*request*)))))
-     (setf (hunchentoot:content-type*) "text/html")
-     (let ((out (hunchentoot:send-headers))
-           (content (tripod->backend (path->tripod* path (path-backend path)) :html)))
-       (write-sequence (flex:string-to-octets (plump:serialize content nil) :external-format :utf8) out))
-     path)
-   (progn
-    (setf (hunchentoot:content-type*) "text/html"
-          (hunchentoot:return-code*) hunchentoot:+http-not-found+)
-    (let* ((out (hunchentoot:send-headers))
-           (404-path (resolve-path "404"))
-           (content (if 404-path
-                        (tripod->backend (path->tripod* 404-path (path-backend 404-path)) :html)
-                        (tripod->backend
-                         (list (make-instance 'heading :level 1 :text "Sorry, there's no such page")
-                               (make-instance
-                                'paragraph
-                                :text "It seems the page you're looking for is not there.
-Please, check the address again."))
-                         :html))))
-      (write-sequence (flex:string-to-octets (plump:serialize content nil) :external-format :utf8) out)))))
+   (respond-regular-page (hunchentoot:script-name hunchentoot:*request*))
+   (respond-404-page)))
