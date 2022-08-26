@@ -173,7 +173,8 @@ Please, check the address again."))
 (hunchentoot:define-easy-handler
     (process-files
      :uri (constantly t)
-     :default-request-type :get)
+     :default-request-type :get
+     :acceptor-names '(http-acceptor https-acceptor))
     ()
   (or
    (respond-regular-page (hunchentoot:script-name hunchentoot:*request*))
