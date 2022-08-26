@@ -147,7 +147,7 @@
    :port 443))
 
 (defun respond-regular-page (script-name)
-  (alexandria:when-let* ((path (ignore-errors (resolve-path ))))
+  (alexandria:when-let* ((path (ignore-errors (resolve-path script-name))))
     (setf (hunchentoot:content-type*) "text/html")
     (let ((out (hunchentoot:send-headers))
           (content (tripod->backend (path->tripod* path (path-backend path)) :html)))
