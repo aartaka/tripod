@@ -148,14 +148,14 @@
 
 (defun respond-regular-page (script-name)
   (alexandria:when-let* ((path (ignore-errors (resolve-path script-name))))
-    (setf (hunchentoot:content-type*) "text/html")
+    (setf (hunchentoot:content-type*) "text/html;charset=utf8")
     (let ((out (hunchentoot:send-headers))
           (content (tripod->backend (path->tripod* path (path-backend path)) :html)))
       (write-sequence (flex:string-to-octets (plump:serialize content nil) :external-format :utf8) out))
     t))
 
 (defun respond-404-page ()
-  (setf (hunchentoot:content-type*) "text/html"
+  (setf (hunchentoot:content-type*) "text/html;charset=utf8"
         (hunchentoot:return-code*) hunchentoot:+http-not-found+)
   (let* ((out (hunchentoot:send-headers))
          (404-path (resolve-path "404"))
