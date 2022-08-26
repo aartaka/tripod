@@ -99,14 +99,16 @@ Special files:
       (push (hunchentoot:start (make-instance 'gopher-acceptor
                                               :port gopher-port
                                               :address address
-                                              :message-log-destination (or log-file *standard-output*)))
+                                              :message-log-destination (or log-file *standard-output*)
+                                              :access-log-destination (or log-file *standard-output*)))
             acceptors))
     (when http-port
       (format t "Starting HTTP handler on port ~d~%" http-port)
       (push (hunchentoot:start (make-instance 'http-acceptor
                                               :port http-port
                                               :address address
-                                              :message-log-destination (or log-file *standard-output*)))
+                                              :message-log-destination (or log-file *standard-output*)
+                                              :access-log-destination (or log-file *standard-output*)))
             acceptors))
     (when (and https-port key-file certificate-file)
       (push (hunchentoot:start (make-instance 'https-acceptor
@@ -114,7 +116,8 @@ Special files:
                                               :port https-port
                                               :ssl-privatekey-file key-file
                                               :ssl-certificate-file certificate-file
-                                              :message-log-destination (or log-file *standard-output*)))
+                                              :message-log-destination (or log-file *standard-output*)
+                                              :access-log-destination (or log-file *standard-output*)))
             acceptors))
     (when (and gemini-port key-file certificate-file)
       (push (hunchentoot:start (make-instance 'gemini-acceptor
@@ -122,7 +125,8 @@ Special files:
                                               :port gemini-port
                                               :ssl-privatekey-file key-file
                                               :ssl-certificate-file certificate-file
-                                              :message-log-destination (or log-file *standard-output*)))
+                                              :message-log-destination (or log-file *standard-output*)
+                                              :access-log-destination (or log-file *standard-output*)))
             acceptors))
     (handler-case (bt:join-thread (find-if (lambda (th)
                                              (search "hunchentoot" (bt:thread-name th)))
