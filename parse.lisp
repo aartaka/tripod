@@ -104,7 +104,11 @@ The backend to use, if not provided, is inferred based on the
             (loop for file in (uiop:directory-files directory)
                   collect (make-instance 'link
                                          :href (quri:uri (pathname-name file))
-                                         :text (pathname-name file))))
+                                         :text (or (ignore-errors
+                                                    (text (find-if (lambda (n) (and (eq (type-of n) 'heading)
+                                                                                    (= 1 (level n))))
+                                                                   (file->tripod file nil))))
+                                                   (pathname-name file)))))
          (list (make-instance 'paragraph :text "This directory is empty..."))))))
   (:documentation "Get the contents of a directory as a list of tripod nodes."))
 
