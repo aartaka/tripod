@@ -93,7 +93,7 @@ The backend to use, if not provided, is inferred based on the
       (append
        (list (make-instance 'heading
                             :level 1
-                            :text (format nil "~:(~a~):" (or (directory-name directory) "root"))))
+                            :text (format nil "~:(~a~)" (or (directory-name directory) "root"))))
        (if (or (uiop:subdirectories directory)
                (uiop:directory-files directory))
            (append
