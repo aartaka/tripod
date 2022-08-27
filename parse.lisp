@@ -94,14 +94,18 @@ The backend to use, if not provided, is inferred based on the
        (list (make-instance 'heading
                             :level 1
                             :text (format nil "~:(~a~):" (or (directory-name directory) "root"))))
-       (loop for dir in (uiop:subdirectories directory)
-             collect (make-instance 'link
-                                    :href (quri:uri (uiop:strcat (directory-name dir) "/"))
-                                    :text (directory-name dir)))
-       (loop for file in (uiop:directory-files directory)
-             collect (make-instance 'link
-                                    :href (quri:uri (pathname-name file))
-                                    :text (pathname-name file))))))
+       (if (or (uiop:subdirectories directory)
+               (uiop:directory-files directory))
+           (append
+            (loop for dir in (uiop:subdirectories directory)
+                  collect (make-instance 'link
+                                         :href (quri:uri (uiop:strcat (directory-name dir) "/"))
+                                         :text (directory-name dir)))
+            (loop for file in (uiop:directory-files directory)
+                  collect (make-instance 'link
+                                         :href (quri:uri (pathname-name file))
+                                         :text (pathname-name file))))
+         (list (make-instance 'paragraph :text "This directory is empty..."))))))
   (:documentation "Get the contents of a directory as a list of tripod nodes."))
 
 (defun directory->tripod* (directory &optional (backend *current-backend*))
