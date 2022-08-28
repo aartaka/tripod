@@ -61,8 +61,8 @@
 
 ;;; Tripod to Backend conversion.
 
-(defmethod tripod->backend ((nodes list) (backend (eql +gemini+)) &key)
-  (tripod->backend nodes +gemtext+))
+(defmethod tripod->backend ((nodes list) (backend (eql +gemtext+)) &key)
+  (tripod->backend nodes +gemini+))
 
 (defmethod tripod->backend ((nodes list) (backend (eql +gemini+)) &key)
   (loop for node in nodes
