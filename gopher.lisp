@@ -16,26 +16,30 @@
          (mapcar (lambda (l) (cl-gopher:write-gopher-line l :stream nil))
                  (call-next-method))))
 
-(defmethod tripod->backend ((nodes list) (backend (eql +gopher+)) &key)
-  (alexandria:mappend #'(lambda (n) (tripod->backend n +gopher+)) nodes))
+(defmethod tripod->backend ((nodes list) (backend (eql +gopher+)) &key address port &allow-other-keys)
+  (alexandria:mappend #'(lambda (n) (tripod->backend n +gopher+ :address address :port port)) nodes))
 
 (defmethod tripod->backend ((node element) (backend (eql +gopher+)) &key)
-  (list (make-instance 'cl-gopher:info-message :display-string (text node))))
+  (list (make-instance 'cl-gopher:info-message
+                       :display-string (text node)
+                       :port 70)))
 
 (defmethod tripod->backend ((node heading) (backend (eql +gopher+)) &key)
   (list (make-instance
          'cl-gopher:info-message
          :display-string (uiop:strcat
-                          (make-string (level node) :initial-element #\#) (text node)))))
+                          (make-string (level node) :initial-element #\#) (text node))
+         :port 70)))
 
 (defmethod tripod->backend ((node items) (backend (eql +gopher+)) &key)
   (mapcar (lambda (e)
             (make-instance
              'cl-gopher:info-message
-             :display-string (uiop:strcat "* " e #\newline)))
+             :display-string (uiop:strcat "* " e #\newline)
+             :port 70))
           (elements node)))
 
-(defmethod tripod->backend ((node link) (backend (eql +gopher+)) &key)
+(defmethod tripod->backend ((node link) (backend (eql +gopher+)) &key address port &allow-other-keys)
   (let ((mime (mimes:mime (quri:uri-path (href node))))
         (absolute-url (quri:uri-scheme (href node))))
     (list
@@ -43,38 +47,57 @@
        ((not absolute-url)
         (make-instance 'cl-gopher:submenu
                        :display-string (text node)
-                       :selector (quri:uri-path (href node))))
+                       :selector (quri:uri-path (href node))
+                       :hostname address
+                       :port port))
        ((and absolute-url
              (uiop:string-prefix-p "text/html" mime))
         (make-instance 'cl-gopher:html-file
                        :display-string (text node)
-                       :selector (quri:render-uri (href node))))
+                       :selector (quri:render-uri (href node))
+                       :hostname address
+                       :port port))
        ((uiop:string-prefix-p "image/gif" mime)
         (make-instance 'cl-gopher:gif
                        :display-string (text node)
-                       :selector (quri:uri-path (href node))))
+                       :selector (quri:uri-path (href node))
+                       :hostname address
+                       :port port))
        ((uiop:string-prefix-p "image/png" mime)
         (make-instance 'cl-gopher:png
                        :display-string (text node)
-                       :selector (quri:uri-path (href node))))
+                       :selector (quri:uri-path (href node))
+                       :hostname address
+                       :port port))
        ((uiop:string-prefix-p "image/" mime)
         (make-instance 'cl-gopher:image
                        :display-string (text node)
-                       :selector (quri:uri-path (href node))))
+                       :selector (quri:uri-path (href node))
+                       :hostname address
+                       :port port))
        ((uiop:string-prefix-p "audio/" mime)
         (make-instance 'cl-gopher:sound-file
                        :display-string (text node)
-                       :selector (quri:uri-path (href node))))
+                       :selector (quri:uri-path (href node))
+                       :hostname address
+                       :port port))
        ((uiop:string-prefix-p "text/" mime)
         (make-instance 'cl-gopher:text-file
                        :display-string (text node)
-                       :selector (quri:uri-path (href node))))
+                       :selector (quri:uri-path (href node))
+                       :hostname address
+                       :port port))
        ((uiop:string-prefix-p "binary/" mime)
         (make-instance 'cl-gopher:binary-file
                        :display-string (text node)
-                       :selector (quri:uri-path (href node))))
+                       :selector (quri:uri-path (href node))
+                       :hostname address
+                       :port port))
        (t
-        (make-instance 'cl-gopher:unknown :display-string (text node)))))))
+        (make-instance 'cl-gopher:unknown
+                       :display-string (text node)
+                       :hostname address
+                       :port port))))))
 
 ;;; Acceptor to serve Gopher content
 
