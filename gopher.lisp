@@ -109,16 +109,16 @@
                    do (return (coerce (subseq vec 0 (1- (length vec))) 'string))
                  else do (vector-push-extend char vec))))
     (handler-case
-        (loop
-          (let* ((path (read-path))
-                 (path (resolve-path path))
-                 (tripod (ignore-errors (path->tripod* path (path-backend path))))
-                 (text (when tripod
-                          (tripod->backend tripod :gopher))))
-            (hunchentoot:log-message* :info "Gopher path: ~a" path)
-            (write-sequence text (usocket:socket-stream socket))
-            (write-line "." (usocket:socket-stream socket))
-            (force-output (usocket:socket-stream socket))))
+        (let* ((path (read-path))
+               (path (resolve-path path))
+               (tripod (ignore-errors (path->tripod* path (path-backend path))))
+               (text (when tripod
+                       (tripod->backend tripod :gopher))))
+          (hunchentoot:log-message* :info "Gopher path: ~a" path)
+          (write-sequence text (usocket:socket-stream socket))
+          (write-line "." (usocket:socket-stream socket))
+          (write-char #\newline (usocket:socket-stream socket))
+          (force-output (usocket:socket-stream socket)))
       (error ()
         (force-output (usocket:socket-stream socket))
         (usocket:socket-close socket)))))
