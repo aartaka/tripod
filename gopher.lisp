@@ -125,6 +125,7 @@
           (write-line "." (usocket:socket-stream socket))
           (write-char #\newline (usocket:socket-stream socket))
           (force-output (usocket:socket-stream socket)))
-      (error ()
+      (error (e)
+        (hunchentoot:log-message* :info "Error while processing gopher request: ~a" e)
         (force-output (usocket:socket-stream socket))
         (usocket:socket-close socket)))))
