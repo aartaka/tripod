@@ -45,7 +45,7 @@
              :port *port*))
           (elements node)))
 
-(defmethod tripod->backend ((node link) (backend (eql +gopher+)) &key address port &allow-other-keys)
+(defmethod tripod->backend ((node link) (backend (eql +gopher+)) &key)
   (let ((mime (mimes:mime (quri:uri-path (href node))))
         (absolute-url (quri:uri-scheme (href node))))
     (list
