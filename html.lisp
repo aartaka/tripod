@@ -168,7 +168,7 @@
                               :text "It seems the page you're looking for is not there.
 Please, check the address again."))
                        :html))))
-    (write-sequence (flex:string-to-octets (plump:serialize content nil) :external-format :utf8) out)))
+    (write-sequence (flex:string-to-octets content :external-format :utf8) out)))
 
 (hunchentoot:define-easy-handler
     (process-files
