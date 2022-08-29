@@ -32,7 +32,7 @@
   (mapcar (lambda (e)
             (make-instance
              'cl-gopher:info-message
-             :display-string (uiop:strcat "* " (text e) #\newline)))
+             :display-string (uiop:strcat "* " e #\newline)))
           (elements node)))
 
 (defmethod tripod->backend ((node link) (backend (eql +gopher+)) &key)
