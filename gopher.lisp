@@ -11,6 +11,11 @@
 
 ;;; Tripod to Backend conversion
 
+(defmethod tripod->backend :around ((nodes list) (backend (eql +gopher+)) &key)
+  (apply #'concatenate 'string
+         (mapcar (lambda (l) (cl-gopher:write-gopher-line l :stream nil))
+                 (call-next-method))))
+
 (defmethod tripod->backend ((nodes list) (backend (eql +gopher+)) &key)
   (alexandria:mappend #'(lambda (n) (tripod->backend n +gopher+)) nodes))
 
@@ -107,11 +112,9 @@
           (let* ((path (read-path))
                  (path (resolve-path path))
                  (tripod (ignore-errors (path->tripod* path (path-backend path))))
-                 (lines (when tripod
+                 (text (when tripod
                           (tripod->backend tripod :gopher))))
-            (mapcar (lambda (gl) (cl-gopher:write-gopher-line
-                                  gl :stream (usocket:socket-stream socket)))
-                    lines)
+            (write-sequence text (usocket:socket-stream socket))
             (write-line "." (usocket:socket-stream socket))
             (force-output (usocket:socket-stream socket))))
       (error ()

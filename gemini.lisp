@@ -64,6 +64,9 @@
 (defmethod tripod->backend ((nodes list) (backend (eql +gemtext+)) &key)
   (tripod->backend nodes +gemini+))
 
+(defmethod tripod->backend :around ((nodes list) (backend (eql +gemini+)) &key)
+  (phos/gemtext:unparse (call-next-method) nil))
+
 (defmethod tripod->backend ((nodes list) (backend (eql +gemini+)) &key)
   (loop for node in nodes
         when (typep node 'items)
@@ -130,20 +133,23 @@
          (write-to-bytes (format nil "20 text/gemini~c~c" #\return #\newline))
          (write-to-bytes
           (phos/gemtext:unparse
-           (append
-            (when (resolve-path "header.gmi")
-              (alexandria:with-input-from-file (f (resolve-path "header.gmi"))
-                (phos/gemtext:parse f)))
-            (tripod->backend (file->tripod path (path-backend path)) :gemini)
-            (when (resolve-path "footer.gmi")
-              (alexandria:with-input-from-file (f (resolve-path "footer.gmi"))
-                (phos/gemtext:parse f))))
+           (when (resolve-path "header.gmi")
+             (alexandria:with-input-from-file (f (resolve-path "header.gmi"))
+               (phos/gemtext:parse f)))
            nil))
+         (write-to-bytes (path->backend path :gemini))
+         (write-to-bytes
+          (phos/gemtext:unparse
+           (when (resolve-path "footer.gmi")
+             (alexandria:with-input-from-file (f (resolve-path "footer.gmi"))
+               (phos/gemtext:parse f)))))
+         (force-output (usocket:socket-stream socket))
          (usocket:socket-close socket))
         (path
          (write-to-bytes (format nil "20 ~a~c~c" mime-type #\return #\newline))
          (write-sequence
           (alexandria:read-file-into-byte-vector path)
           (usocket:socket-stream socket))
+         (force-output (usocket:socket-stream socket))
          (usocket:socket-close socket))
         (t (usocket:socket-close socket))))))

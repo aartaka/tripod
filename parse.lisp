@@ -126,6 +126,11 @@ The backend to use, if not provided, is inferred based on the
       (directory->tripod path backend)
       (file->tripod path backend)))
 
+(defun path->backend (path &optional (backend *current-backend*))
+  (if (eq (path-backend path) backend)
+      (uiop:read-file-string path)
+      (tripod->backend (path->tripod* path (path-backend path)) backend)))
+
 (defmethod resolve-path ((file pathname) &optional (current-path (tripod-directory)))
   (let* ((current-path (if (uiop:absolute-pathname-p current-path)
                            current-path
