@@ -28,7 +28,7 @@
   (list (make-instance
          'cl-gopher:info-message
          :display-string (uiop:strcat
-                          (make-string (level node) :initial-element #\#) (text node))
+                          (make-string (level node) :initial-element #\#) " " (text node))
          :port 70)))
 
 (defmethod tripod->backend ((node items) (backend (eql +gopher+)) &key)
