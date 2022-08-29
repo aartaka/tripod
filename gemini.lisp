@@ -142,7 +142,8 @@
           (phos/gemtext:unparse
            (when (resolve-path "footer.gmi")
              (alexandria:with-input-from-file (f (resolve-path "footer.gmi"))
-               (phos/gemtext:parse f)))))
+               (phos/gemtext:parse f)))
+           nil))
          (force-output (usocket:socket-stream socket))
          (usocket:socket-close socket))
         (path
