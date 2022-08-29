@@ -25,6 +25,7 @@
 (defmethod tripod->backend ((node element) (backend (eql +gopher+)) &key)
   (list (make-instance 'cl-gopher:info-message
                        :display-string (text node)
+                       :selector ""
                        :hostname *address*
                        :port *port*)))
 
@@ -33,6 +34,7 @@
          'cl-gopher:info-message
          :display-string (uiop:strcat
                           (make-string (level node) :initial-element #\#) " " (text node))
+         :selector ""
          :hostname *address*
          :port *port*)))
 
@@ -41,6 +43,7 @@
             (make-instance
              'cl-gopher:info-message
              :display-string (uiop:strcat "* " e #\newline)
+             :selector ""
              :hostname *address*
              :port *port*))
           (elements node)))
