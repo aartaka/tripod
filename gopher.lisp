@@ -101,11 +101,9 @@
            (loop with stream = (usocket:socket-stream socket)
                  with vec = (make-array 0 :element-type 'character
                                           :adjustable t :fill-pointer 0)
-                 for char = (read-char stream) and prev = char
-                 when (and prev (eql char #\newline)
-                           (eql prev #\return))
-                   do (vector-pop vec)
-                   and do (return (coerce vec 'string))
+                 for char = (read-char stream)
+                 when (eql char #\newline)
+                   do (return (coerce (subseq vec 0 (1- (length vec))) 'string))
                  else do (vector-push-extend char vec))))
     (handler-case
         (loop
@@ -114,6 +112,7 @@
                  (tripod (ignore-errors (path->tripod* path (path-backend path))))
                  (text (when tripod
                           (tripod->backend tripod :gopher))))
+            (hunchentoot:log-message* :info "Gopher path: ~a" path)
             (write-sequence text (usocket:socket-stream socket))
             (write-line "." (usocket:socket-stream socket))
             (force-output (usocket:socket-stream socket))))
