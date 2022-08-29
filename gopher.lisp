@@ -87,6 +87,7 @@
 (defmethod hunchentoot:start-listening ((acceptor gopher-acceptor))
   (when (hunchentoot::acceptor-listen-socket acceptor)
     (hunchentoot:hunchentoot-error "acceptor ~A is already listening" acceptor))
+  (hunchentoot:log-message* :info "Connecting to socket at ~a" (hunchentoot:acceptor-address acceptor))
   (setf (hunchentoot::acceptor-listen-socket acceptor)
         (usocket:socket-listen (or (hunchentoot:acceptor-address acceptor)
                                    usocket:*wildcard-host*)
