@@ -38,43 +38,43 @@
 (defmethod tripod->backend ((node link) (backend (eql +gopher+)) &key)
   (let ((mime (mimes:mime (quri:uri-path (href node))))
         (absolute-url (quri:uri-scheme (href node))))
-    (cond
-      ((and (not absolute-url)
-            (not mime))
-       (make-instance 'cl-gopher:submenu
-                      :display-string (text node)
-                      :selector (quri:uri-path (href node))))
-      ((and absolute-url
-            (uiop:string-prefix-p "text/html" mime))
-       (make-instance 'cl-gopher:html-file
-                      :display-string (text node)
-                      :selector (quri:render-uri (href node))))
-      ((uiop:string-prefix-p "image/gif" mime)
-       (make-instance 'cl-gopher:gif
-                      :display-string (text node)
-                      :selector (quri:uri-path (href node))))
-      ((uiop:string-prefix-p "image/png" mime)
-       (make-instance 'cl-gopher:png
-                      :display-string (text node)
-                      :selector (quri:uri-path (href node))))
-      ((uiop:string-prefix-p "image/" mime)
-       (make-instance 'cl-gopher:image
-                      :display-string (text node)
-                      :selector (quri:uri-path (href node))))
-      ((uiop:string-prefix-p "audio/" mime)
-       (make-instance 'cl-gopher:sound-file
-                      :display-string (text node)
-                      :selector (quri:uri-path (href node))))
-      ((uiop:string-prefix-p "text/" mime)
-       (make-instance 'cl-gopher:text-file
-                      :display-string (text node)
-                      :selector (quri:uri-path (href node))))
-      ((uiop:string-prefix-p "binary/" mime)
-       (make-instance 'cl-gopher:binary-file
-                      :display-string (text node)
-                      :selector (quri:uri-path (href node))))
-      (t
-       (make-instance 'cl-gopher:unknown :display-string (text node))))))
+    (list
+     (cond
+       ((not absolute-url)
+        (make-instance 'cl-gopher:submenu
+                       :display-string (text node)
+                       :selector (quri:uri-path (href node))))
+       ((and absolute-url
+             (uiop:string-prefix-p "text/html" mime))
+        (make-instance 'cl-gopher:html-file
+                       :display-string (text node)
+                       :selector (quri:render-uri (href node))))
+       ((uiop:string-prefix-p "image/gif" mime)
+        (make-instance 'cl-gopher:gif
+                       :display-string (text node)
+                       :selector (quri:uri-path (href node))))
+       ((uiop:string-prefix-p "image/png" mime)
+        (make-instance 'cl-gopher:png
+                       :display-string (text node)
+                       :selector (quri:uri-path (href node))))
+       ((uiop:string-prefix-p "image/" mime)
+        (make-instance 'cl-gopher:image
+                       :display-string (text node)
+                       :selector (quri:uri-path (href node))))
+       ((uiop:string-prefix-p "audio/" mime)
+        (make-instance 'cl-gopher:sound-file
+                       :display-string (text node)
+                       :selector (quri:uri-path (href node))))
+       ((uiop:string-prefix-p "text/" mime)
+        (make-instance 'cl-gopher:text-file
+                       :display-string (text node)
+                       :selector (quri:uri-path (href node))))
+       ((uiop:string-prefix-p "binary/" mime)
+        (make-instance 'cl-gopher:binary-file
+                       :display-string (text node)
+                       :selector (quri:uri-path (href node))))
+       (t
+        (make-instance 'cl-gopher:unknown :display-string (text node)))))))
 
 ;;; Acceptor to serve Gopher content
 
