@@ -99,10 +99,12 @@
   (values))
 
 (defmethod hunchentoot:accept-connections :before ((acceptor gopher-acceptor))
-  (hunchentoot:log-message* :info "Accepting gopher connection."))
+  (let ((hunchentoot:*acceptor* acceptor))
+    (hunchentoot:log-message* :info "Accepting gopher connection.")))
 
 (defmethod hunchentoot:process-connection :before ((acceptor gopher-acceptor) socket)
-  (hunchentoot:log-message* :info "Starting gopher request processing."))
+  (let ((hunchentoot:*acceptor* acceptor))
+    (hunchentoot:log-message* :info "Starting gopher request processing.")))
 
 ;; Fix selectors so that files are serveable as submenus/textfiles.
 (defmethod hunchentoot:process-connection ((acceptor gopher-acceptor) socket)
