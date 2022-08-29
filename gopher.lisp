@@ -119,9 +119,7 @@
     (handler-case
         (let* ((path (read-path))
                (path (resolve-path path))
-               (tripod (ignore-errors (path->tripod* path (path-backend path))))
-               (text (when tripod
-                       (tripod->backend tripod :gopher))))
+               (text (path->backend path :gopher)))
           (hunchentoot:log-message* :info "Gopher path: ~a" path)
           (write-sequence text (usocket:socket-stream socket))
           (write-line "." (usocket:socket-stream socket))
