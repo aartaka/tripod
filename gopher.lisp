@@ -19,6 +19,7 @@
          (mapcar (lambda (l) (cl-gopher:write-gopher-line l :stream nil))
                  (call-next-method))))
 
+;; TODO: Split all text into parts bounded by 80 chars.
 (defmethod tripod->backend ((nodes list) (backend (eql +gopher+)) &key)
   (alexandria:mappend #'(lambda (n) (tripod->backend n +gopher+)) nodes))
 
