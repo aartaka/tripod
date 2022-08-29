@@ -28,6 +28,29 @@
                        :hostname *address*
                        :port *port*)))
 
+(defmethod tripod->backend ((node blockquote) (backend (eql +gopher+)) &key)
+  (mapcar (lambda (line)
+            (make-instance
+             'cl-gopher:info-message
+             :display-string (uiop:strcat "> " line)
+             :hostname *address*
+             :port *port*))
+          (uiop:split-string (text node) :separator '(#\Newline))))
+
+(defmethod tripod->backend ((node preformatted) (backend (eql +gopher+)) &key)
+  (append
+   (list (make-instance
+          'cl-gopher:info-message
+          :display-string (uiop:strcat "``` " (alt node))))
+   (mapcar (lambda (line)
+             (make-instance
+              'cl-gopher:info-message
+              :display-string line))
+           (uiop:split-string (text node) :separator '(#\Newline)))
+   (list (make-instance
+          'cl-gopher:info-message
+          :display-string (uiop:strcat "``` " (alt node))))))
+
 (defmethod tripod->backend ((node heading) (backend (eql +gopher+)) &key)
   (list (make-instance
          'cl-gopher:info-message
