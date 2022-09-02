@@ -20,13 +20,18 @@
                  (call-next-method))))
 
 (defun split-for-terminal (string &optional (width 80))
-  (loop with last = (1- (length string))
-        for start = 0 then end
-        for end = (position #\Space string :start start :end (min last (+ start width)) :from-end t)
-        until (>= (+ start width) last)
-        collect (subseq string start end) into lines
-        finally (return (mapcar (alexandria:curry #'string-trim " ")
-                                (append lines (list (subseq string start)))))))
+  "Splits the STRING into a list of strings.
+Every string in the resulting list is guaranteed to be under WIDTH in length.
+ALWAYS returns a list, even if there's just one string in it."
+  (if (< (length string) width)
+      (list string)
+      (loop with last = (1- (length string))
+            for start = 0 then end
+            for end = (position #\Space string :start start :end (min last (+ start width)) :from-end t)
+            until (>= (+ start width) last)
+            collect (subseq string start end) into lines
+            finally (return (mapcar (alexandria:curry #'string-trim " ")
+                                    (append lines (list (subseq string start))))))))
 
 (defun mkline (class display-string &optional selector)
   (apply #'make-instance
