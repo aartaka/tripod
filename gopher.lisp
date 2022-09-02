@@ -28,62 +28,46 @@
         finally (return (mapcar (alexandria:curry #'string-trim " ")
                                 (append lines (list (subseq string start)))))))
 
+(defun mkline (class display-string &optional selector)
+  (apply #'make-instance
+         class
+         :display-string display-string
+         :hostname *address*
+         :port *port*
+         (when selector
+           (list :selector selector))))
+
 (defmethod tripod->backend ((nodes list) (backend (eql +gopher+)) &key)
   (alexandria:mappend #'(lambda (n) (tripod->backend n +gopher+)) nodes))
 
 (defmethod tripod->backend ((node element) (backend (eql +gopher+)) &key)
-  (mapcar (lambda (l) (make-instance 'cl-gopher:info-message
-                                     :display-string l
-                                     :hostname *address*
-                                     :port *port*))
+  (mapcar (lambda (l) (mkline 'cl-gopher:info-message l))
           (split-for-terminal (text node))))
 
 (defmethod tripod->backend ((node blockquote) (backend (eql +gopher+)) &key)
   (mapcar (lambda (line)
-            (make-instance
-             'cl-gopher:info-message
-             :display-string (uiop:strcat "> " line)
-             :hostname *address*
-             :port *port*))
+            (mkline 'cl-gopher:info-message (uiop:strcat "> " line)))
           (split-for-terminal (text node) 77)))
 
 (defmethod tripod->backend ((node preformatted) (backend (eql +gopher+)) &key)
   (append
-   (list (make-instance
-          'cl-gopher:info-message
-          :display-string (uiop:strcat "``` " (alt node))))
+   (list (mkline 'cl-gopher:info-message (uiop:strcat "``` " (alt node))))
    (mapcar (lambda (line)
-             (make-instance
-              'cl-gopher:info-message
-              :display-string line))
+             (mkline 'cl-gopher:info-message line))
            (uiop:split-string (text node) :separator '(#\Newline)))
-   (list (make-instance
-          'cl-gopher:info-message
-          :display-string (uiop:strcat "``` " (alt node))))))
+   (list (mkline 'cl-gopher:info-message (uiop:strcat "``` " (alt node))))))
 
 (defmethod tripod->backend ((node heading) (backend (eql +gopher+)) &key)
-  (list (make-instance
-         'cl-gopher:info-message
-         :display-string (uiop:strcat
-                          (make-string (level node) :initial-element #\#) " " (text node))
-         :hostname *address*
-         :port *port*)))
+  (list (mkline 'cl-gopher:info-message
+                (uiop:strcat (make-string (level node) :initial-element #\#) " " (text node)))))
 
 (defmethod tripod->backend ((node items) (backend (eql +gopher+)) &key)
   (alexandria:mappend
    (lambda (e)
      (let ((terminal-lines (split-for-terminal e 77)))
-       (cons (make-instance
-              'cl-gopher:info-message
-              :display-string (uiop:strcat "- " (first terminal-lines))
-              :hostname *address*
-              :port *port*)
+       (cons (mkline 'cl-gopher:info-message (uiop:strcat "- " (first terminal-lines)))
              (mapcar (lambda (l)
-                       (make-instance
-                        'cl-gopher:info-message
-                        :display-string (uiop:strcat "  " l)
-                        :hostname *address*
-                        :port *port*))
+                       (mkline 'cl-gopher:info-message (uiop:strcat "  " l)))
                      (rest terminal-lines)))))
    (elements node)))
 
@@ -93,59 +77,24 @@
     (list
      (cond
        ((not absolute-url)
-        (make-instance 'cl-gopher:submenu
-                       :display-string (text node)
-                       :selector (quri:uri-path (href node))
-                       :hostname *address*
-                       :port *port*))
+        (mkline 'cl-gopher:submenu (text node) (quri:uri-path (href node))))
        ((and absolute-url
              (member (quri:uri-scheme (href node)) '("http" "https") :test #'string=))
-        (make-instance 'cl-gopher:html-file
-                       :display-string (text node)
-                       :selector (quri:render-uri (href node))
-                       :hostname *address*
-                       :port *port*))
+        (mkline 'cl-gopher:html-file (text node) (quri:render-uri (href node))))
        ((uiop:string-prefix-p "image/gif" mime)
-        (make-instance 'cl-gopher:gif
-                       :display-string (text node)
-                       :selector (quri:uri-path (href node))
-                       :hostname *address*
-                       :port *port*))
+        (mkline 'cl-gopher:gif (text node) (quri:uri-path (href node))))
        ((uiop:string-prefix-p "image/png" mime)
-        (make-instance 'cl-gopher:png
-                       :display-string (text node)
-                       :selector (quri:uri-path (href node))
-                       :hostname *address*
-                       :port *port*))
+        (mkline 'cl-gopher:png (text node) (quri:uri-path (href node))))
        ((uiop:string-prefix-p "image/" mime)
-        (make-instance 'cl-gopher:image
-                       :display-string (text node)
-                       :selector (quri:uri-path (href node))
-                       :hostname *address*
-                       :port *port*))
+        (mkline 'cl-gopher:image (text node) (quri:uri-path (href node))))
        ((uiop:string-prefix-p "audio/" mime)
-        (make-instance 'cl-gopher:sound-file
-                       :display-string (text node)
-                       :selector (quri:uri-path (href node))
-                       :hostname *address*
-                       :port *port*))
+        (mkline 'cl-gopher:sound-file (text node) (quri:uri-path (href node))))
        ((uiop:string-prefix-p "text/" mime)
-        (make-instance 'cl-gopher:text-file
-                       :display-string (text node)
-                       :selector (quri:uri-path (href node))
-                       :hostname *address*
-                       :port *port*))
+        (mkline 'cl-gopher:text-file (text node) (quri:uri-path (href node))))
        ((uiop:string-prefix-p "binary/" mime)
-        (make-instance 'cl-gopher:binary-file
-                       :display-string (text node)
-                       :selector (quri:uri-path (href node))
-                       :hostname *address*
-                       :port *port*))
+        (mkline 'cl-gopher:binary-file (text node) (quri:uri-path (href node))))
        (t
-        (make-instance 'cl-gopher:unknown
-                       :display-string (text node)
-                       :hostname *address*
-                       :port *port*))))))
+        (mkline 'cl-gopher:unknown (text node)))))))
 
 ;;; Acceptor to serve Gopher content
 
