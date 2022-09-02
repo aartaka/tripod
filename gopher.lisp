@@ -19,15 +19,24 @@
          (mapcar (lambda (l) (cl-gopher:write-gopher-line l :stream nil))
                  (call-next-method))))
 
-;; TODO: Split all text into parts bounded by 80 chars.
+(defun split-for-terminal (string &optional (width 80))
+  (loop with last = (1- (length string))
+        for start = 0 then end
+        for end = (position #\Space string :start start :end (min last (+ start width)) :from-end t)
+        until (>= (+ start width) last)
+        collect (subseq string start end) into lines
+        finally (return (mapcar (alexandria:curry #'string-trim " ")
+                                (append lines (list (subseq string start)))))))
+
 (defmethod tripod->backend ((nodes list) (backend (eql +gopher+)) &key)
   (alexandria:mappend #'(lambda (n) (tripod->backend n +gopher+)) nodes))
 
 (defmethod tripod->backend ((node element) (backend (eql +gopher+)) &key)
-  (list (make-instance 'cl-gopher:info-message
-                       :display-string (text node)
-                       :hostname *address*
-                       :port *port*)))
+  (mapcar (lambda (l) (make-instance 'cl-gopher:info-message
+                                     :display-string l
+                                     :hostname *address*
+                                     :port *port*))
+          (split-for-terminal (text node))))
 
 (defmethod tripod->backend ((node blockquote) (backend (eql +gopher+)) &key)
   (mapcar (lambda (line)
@@ -36,7 +45,7 @@
              :display-string (uiop:strcat "> " line)
              :hostname *address*
              :port *port*))
-          (uiop:split-string (text node) :separator '(#\Newline))))
+          (split-for-terminal (text node) 77)))
 
 (defmethod tripod->backend ((node preformatted) (backend (eql +gopher+)) &key)
   (append
@@ -61,13 +70,22 @@
          :port *port*)))
 
 (defmethod tripod->backend ((node items) (backend (eql +gopher+)) &key)
-  (mapcar (lambda (e)
-            (make-instance
-             'cl-gopher:info-message
-             :display-string (uiop:strcat "- " e)
-             :hostname *address*
-             :port *port*))
-          (elements node)))
+  (alexandria:mappend
+   (lambda (e)
+     (let ((terminal-lines (split-for-terminal e 77)))
+       (cons (make-instance
+              'cl-gopher:info-message
+              :display-string (uiop:strcat "- " e)
+              :hostname *address*
+              :port *port*)
+             (mapcar (lambda (l)
+                       (make-instance
+                        'cl-gopher:info-message
+                        :display-string (uiop:strcat "  " l)
+                        :hostname *address*
+                        :port *port*))
+                     (rest terminal-lines)))))
+   (elements node)))
 
 (defmethod tripod->backend ((node link) (backend (eql +gopher+)) &key)
   (let ((mime (mimes:mime (quri:uri-path (href node))))
@@ -81,7 +99,7 @@
                        :hostname *address*
                        :port *port*))
        ((and absolute-url
-             (uiop:string-prefix-p "text/html" mime))
+             (member (quri:uri-scheme (href node)) '("http" "https") :test #'string=))
         (make-instance 'cl-gopher:html-file
                        :display-string (text node)
                        :selector (quri:render-uri (href node))
