@@ -158,7 +158,7 @@ The backend to use, if not provided, is inferred based on the
                      (uiop:merge-pathnames* file current-path)))))
     file))
 
-(defmethod resolve-path ((path string) &optional (current-path (tripod-directory)))
+(defmethod resolve-path ((path string))
   (if (member path '("/" "" "index") :test #'string-equal)
       (resolve-path (pathname "index"))
       (let ((clean-path
