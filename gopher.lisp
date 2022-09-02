@@ -75,7 +75,7 @@
      (let ((terminal-lines (split-for-terminal e 77)))
        (cons (make-instance
               'cl-gopher:info-message
-              :display-string (uiop:strcat "- " e)
+              :display-string (uiop:strcat "- " (first terminal-lines))
               :hostname *address*
               :port *port*)
              (mapcar (lambda (l)
