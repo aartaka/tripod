@@ -67,7 +67,7 @@ ALWAYS returns a list, even if there's just one string in it."
    (list (mkline 'cl-gopher:info-message (uiop:strcat "``` " (alt node))))
    (mapcar (lambda (line)
              (mkline 'cl-gopher:info-message line))
-           (uiop:split-string (text node) :separator '(#\Newline)))
+           (butlast (uiop:split-string (text node) :separator '(#\Newline))))
    (list (mkline 'cl-gopher:info-message (uiop:strcat "``` " (alt node)))
          (mkline 'cl-gopher:info-message ""))))
 
