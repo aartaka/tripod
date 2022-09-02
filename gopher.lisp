@@ -44,6 +44,12 @@
   (mapcar (lambda (l) (mkline 'cl-gopher:info-message l))
           (split-for-terminal (text node))))
 
+(defmethod tripod->backend ((node paragraph) (backend (eql +gopher+)) &key)
+  (append
+   (mapcar (lambda (l) (mkline 'cl-gopher:info-message l))
+           (split-for-terminal (text node)))
+   (list (mkline 'cl-gopher:info-message ""))))
+
 (defmethod tripod->backend ((node blockquote) (backend (eql +gopher+)) &key)
   (mapcar (lambda (line)
             (mkline 'cl-gopher:info-message (uiop:strcat "> " line)))
@@ -59,7 +65,6 @@
 
 (defmethod tripod->backend ((node heading) (backend (eql +gopher+)) &key)
   (list
-   (mkline 'cl-gopher:info-message "")
    (mkline 'cl-gopher:info-message
            (uiop:strcat (make-string (level node) :initial-element #\#) " " (text node)))
    (mkline 'cl-gopher:info-message "")))
