@@ -97,11 +97,13 @@ The backend to use, if not provided, is inferred based on the
        (if (or (uiop:subdirectories directory)
                (uiop:directory-files directory))
            (append
-            (loop for dir in (uiop:subdirectories directory)
+            (loop for dir in (sort (uiop:subdirectories directory)
+                                   #'< :key #'uiop:safe-file-write-date)
                   collect (make-instance 'link
                                          :href (quri:uri (uiop:strcat (directory-name dir) "/"))
                                          :text (directory-name dir)))
-            (loop for file in (uiop:directory-files directory)
+            (loop for file in (sort (uiop:directory-files directory)
+                                    #'< :key #'uiop:safe-file-write-date)
                   collect (make-instance 'link
                                          :href (quri:uri (pathname-name file))
                                          :text (or (ignore-errors
