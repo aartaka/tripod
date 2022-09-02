@@ -51,9 +51,11 @@
    (list (mkline 'cl-gopher:info-message ""))))
 
 (defmethod tripod->backend ((node blockquote) (backend (eql +gopher+)) &key)
-  (mapcar (lambda (line)
-            (mkline 'cl-gopher:info-message (uiop:strcat "> " line)))
-          (split-for-terminal (text node) 77)))
+  (append
+   (mapcar (lambda (line)
+             (mkline 'cl-gopher:info-message (uiop:strcat "> " line)))
+           (split-for-terminal (text node) 77))
+   (list (mkline 'cl-gopher:info-message ""))))
 
 (defmethod tripod->backend ((node preformatted) (backend (eql +gopher+)) &key)
   (append
@@ -61,7 +63,8 @@
    (mapcar (lambda (line)
              (mkline 'cl-gopher:info-message line))
            (uiop:split-string (text node) :separator '(#\Newline)))
-   (list (mkline 'cl-gopher:info-message (uiop:strcat "``` " (alt node))))))
+   (list (mkline 'cl-gopher:info-message (uiop:strcat "``` " (alt node)))
+         (mkline 'cl-gopher:info-message ""))))
 
 (defmethod tripod->backend ((node heading) (backend (eql +gopher+)) &key)
   (list
@@ -77,7 +80,8 @@
              (mapcar (lambda (l)
                        (mkline 'cl-gopher:info-message (uiop:strcat "  " l)))
                      (rest terminal-lines)))))
-   (elements node)))
+   (append (elements node)
+           (list ""))))
 
 (defmethod tripod->backend ((node link) (backend (eql +gopher+)) &key)
   (let ((mime (mimes:mime (quri:uri-path (href node))))
