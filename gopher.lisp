@@ -87,7 +87,7 @@ ALWAYS returns a list, even if there's just one string in it."
                         (mkline 'cl-gopher:info-message (uiop:strcat "  " l)))
                       (rest terminal-lines)))))
     (elements node))
-   (mkline 'cl-gopher:info-message "")))
+   (list (mkline 'cl-gopher:info-message ""))))
 
 (defmethod tripod->backend ((node link) (backend (eql +gopher+)) &key)
   (let ((mime (mimes:mime (quri:uri-path (href node))))
