@@ -111,7 +111,8 @@
    :address "127.0.0.1"
    :port 1965))
 
-(defmethod hunchentoot:process-connection ((acceptor gemini-acceptor) socket)
+(defmethod hunchentoot:process-connection ((acceptor gemini-acceptor) socket
+                                           &aux (hunchentoot:*acceptor* acceptor))
   (hunchentoot:log-message* :info "Starting gemini request processing...")
   (let* ((url (quri:uri (loop with stream = (usocket:socket-stream socket)
                               with vec = (make-array 0 :element-type '(unsigned-byte 8)
