@@ -112,19 +112,22 @@
    :port 1965))
 
 (defmethod hunchentoot:process-connection ((acceptor gemini-acceptor) socket)
-  (let* ((url (quri:uri (loop with stream = (usocket:socket-stream socket)
-                              with vec = (make-array 0 :element-type '(unsigned-byte 8)
-                                                       :adjustable t :fill-pointer 0)
-                              for char = (read-byte stream) and prev = char
-                              until (and (= char (char-code #\newline))
-                                         (= prev (char-code #\return)))
-                              do (vector-push-extend char vec)
-                              finally (progn
-                                        (vector-pop vec)
-                                        (return (flex:octets-to-string vec :external-format :utf-8))))))
-         (path (resolve-path (quri:uri-path url)))
+  (let* ((url (loop with stream = (usocket:socket-stream socket)
+                    with vec = (make-array 0 :element-type '(unsigned-byte 8)
+                                           :adjustable t :fill-pointer 0)
+                    for char = (read-byte stream) and prev = char
+                    until (and (= char (char-code #\newline))
+                               (= prev (char-code #\return)))
+                    do (vector-push-extend char vec)
+                    finally (let ((path (progn
+                                          (vector-pop vec)
+                                          (flex:octets-to-string vec :external-format :utf-8))))
+                              (hunchentoot:log-message* :info "Got a gemini path: ~a" path)
+                              (return path))))
+         (path (resolve-path url))
          (mime-type (mimes:mime path))
          (tripod (ignore-errors (file->tripod path (path-backend path)))))
+    (hunchentoot:log-message* :info "Got a gemini request: ~a" url)
     (flet ((write-to-bytes (string)
              (write-sequence (flex:string-to-octets string)
                              (usocket:socket-stream socket))))
