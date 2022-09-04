@@ -160,12 +160,13 @@ The backend to use, if not provided, is inferred based on the
                      (uiop:merge-pathnames* file current-path)))))
     file))
 
-(defmethod resolve-path ((path string))
+(defmethod resolve-path ((path string) &optional (current-path (tripod-directory)))
+  (declare (ignorable current-path))
   (if (member path '("/" "" "index") :test #'string-equal)
       (resolve-path (pathname "index"))
       (let ((clean-path
               (if (char= #\/ (elt path 0))
                   (subseq path 1)
                   path)))
-        (or (resolve-path (pathname clean-path))
-            (resolve-path (pathname (uiop:strcat clean-path "/")))))))
+        (or (resolve-path (pathname clean-path) current-path)
+            (resolve-path (pathname (uiop:strcat clean-path "/")) current-path)))))
