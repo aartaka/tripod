@@ -9,6 +9,7 @@
   :build-operation "program-op"
   :build-pathname "tripod"
   :entry-point "tripod::entry-point"
+  :pathname "src"
   :depends-on (#:alexandria #:trivial-mimes
                #:hunchentoot #:cl-gopher #:phos #:plump #:clss #:cl-markdown)
   :components ((:file "package")
