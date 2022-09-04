@@ -119,6 +119,7 @@
                                                      :adjustable t :fill-pointer 0)
                               for char = (read-byte stream) and prev = char
                               until (and (= char (char-code #\newline))
+                                         prev
                                          (= prev (char-code #\return)))
                               do (vector-push-extend char vec)
                               finally (let ((path (progn
