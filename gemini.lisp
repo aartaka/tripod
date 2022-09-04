@@ -121,6 +121,7 @@
                               until (and (= char (char-code #\newline))
                                          prev
                                          (= prev (char-code #\return)))
+                              do (hunchentoot:log-message* :info "Read a character: ~s~%" char)
                               do (vector-push-extend char vec)
                               finally (let ((path (progn
                                                     (vector-pop vec)
