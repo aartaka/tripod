@@ -128,13 +128,7 @@
 (defmethod hunchentoot:process-connection ((acceptor gemini-acceptor) socket
                                            &aux (hunchentoot:*acceptor* acceptor))
   (hunchentoot:log-message* :info "Starting gemini request processing...")
-  (let* ((url (quri:uri (loop for char = (read-char (usocket:socket-stream socket))
-                              and prev = char
-                              until (and (eql char #\newline)
-                                         prev
-                                         (eql prev #\return))
-                              collect char into url-list
-                              finally (return (coerce (butlast url-list) 'string)))))
+  (let* ((url (quri:uri (read-line (usocket:socket-stream socket) nil nil)))
          (path (resolve-path (quri:uri-path url)))
          (mime-type (mimes:mime path))
          (tripod (ignore-errors (file->tripod path (path-backend path)))))
