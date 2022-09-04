@@ -111,57 +111,52 @@
    :address "127.0.0.1"
    :port 1965))
 
-(defmethod hunchentoot:start-listening ((acceptor gemini-acceptor))
-  (when (hunchentoot::acceptor-listen-socket acceptor)
-    (hunchentoot:hunchentoot-error "acceptor ~A is already listening" acceptor))
-  (let ((hunchentoot:*acceptor* acceptor))
-    (hunchentoot:log-message* :info "Connecting to socket listening at port ~a"
-                              (hunchentoot:acceptor-port acceptor)))
-  (setf (hunchentoot::acceptor-listen-socket acceptor)
-        (usocket:socket-listen (or (hunchentoot:acceptor-address acceptor)
-                                   usocket:*wildcard-host*)
-                               (hunchentoot:acceptor-port acceptor)
-                               :reuseaddress t
-                               :backlog (hunchentoot:acceptor-listen-backlog acceptor)))
-  (values))
-
 (defmethod hunchentoot:process-connection ((acceptor gemini-acceptor) socket
                                            &aux (hunchentoot:*acceptor* acceptor))
   (hunchentoot:log-message* :info "Starting gemini request processing...")
-  (let* ((url (quri:uri (read-line (usocket:socket-stream socket) nil nil)))
+  (let* ((url (quri:uri (loop with stream = (usocket:socket-stream socket)
+                              with vec = (make-array 0 :element-type '(unsigned-byte 8)
+                                                     :adjustable t :fill-pointer 0)
+                              for char = (read-byte stream) and prev = char
+                              until (and (= char (char-code #\newline))
+                                         prev
+                                         (= prev (char-code #\return)))
+                              do (vector-push-extend char vec)
+                              finally (let ((path (progn
+                                                    (vector-pop vec)
+                                                    (flex:octets-to-string vec :external-format :utf-8))))
+                                        (hunchentoot:log-message* :info "Got a gemini url: ~a" path)
+                                        (return path)))))
          (path (resolve-path (quri:uri-path url)))
          (mime-type (mimes:mime path))
          (tripod (ignore-errors (file->tripod path (path-backend path)))))
     (hunchentoot:log-message* :info "Got a gemini request: ~a" url)
-    (cond
-      ((and path tripod)
-       (write-sequence (format nil "20 text/gemini~c~c" #\return #\newline)
-                       (usocket:socket-stream socket))
-       (write-sequence
-        (phos/gemtext:unparse
-         (when (resolve-path "header.gmi")
-           (alexandria:with-input-from-file (f (resolve-path "header.gmi"))
-             (phos/gemtext:parse f)))
-         nil)
-        (usocket:socket-stream socket))
-       (write-sequence (path->backend path :gemini)
-                       (usocket:socket-stream socket))
-       (write-sequence
-        (phos/gemtext:unparse
-         (when (resolve-path "footer.gmi")
-           (alexandria:with-input-from-file (f (resolve-path "footer.gmi"))
-             (phos/gemtext:parse f)))
-         nil)
-        (usocket:socket-stream socket))
-       (write-char #\newline (usocket:socket-stream socket))
-       (force-output (usocket:socket-stream socket))
-       (usocket:socket-close socket))
-      (path
-       (write-sequence (format nil "20 ~a~c~c" mime-type #\return #\newline)
-                       (usocket:socket-stream socket))
-       (write-sequence
-        (uiop:read-file-string path)
-        (usocket:socket-stream socket))
-       (force-output (usocket:socket-stream socket))
-       (usocket:socket-close socket))
-      (t (usocket:socket-close socket)))))
+    (flet ((write-to-bytes (string)
+             (write-sequence (flex:string-to-octets string)
+                             (usocket:socket-stream socket))))
+      (cond
+        ((and path tripod)
+         (write-to-bytes (format nil "20 text/gemini~c~c" #\return #\newline))
+         (write-to-bytes
+          (phos/gemtext:unparse
+           (when (resolve-path "header.gmi")
+             (alexandria:with-input-from-file (f (resolve-path "header.gmi"))
+               (phos/gemtext:parse f)))
+           nil))
+         (write-to-bytes (path->backend path :gemini))
+         (write-to-bytes
+          (phos/gemtext:unparse
+           (when (resolve-path "footer.gmi")
+             (alexandria:with-input-from-file (f (resolve-path "footer.gmi"))
+               (phos/gemtext:parse f)))
+           nil))
+         (force-output (usocket:socket-stream socket))
+         (usocket:socket-close socket))
+        (path
+         (write-to-bytes (format nil "20 ~a~c~c" mime-type #\return #\newline))
+         (write-sequence
+          (alexandria:read-file-into-byte-vector path)
+          (usocket:socket-stream socket))
+         (force-output (usocket:socket-stream socket))
+         (usocket:socket-close socket))
+        (t (usocket:socket-close socket))))))
