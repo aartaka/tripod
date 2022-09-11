@@ -9,14 +9,13 @@
   :build-operation "program-op"
   :build-pathname "tripod"
   :entry-point "tripod:entry-point"
-  :pathname "src"
   :depends-on (#:alexandria #:trivial-mimes
                #:hunchentoot #:cl-gopher #:phos #:plump #:clss #:cl-markdown)
-  :components ((:file "package")
-               (:file "model")
-               (:file "parse")
-               (:file "gopher")
-               (:file "gemini")
-               (:file "html")
-               (:file "tripod")
-               (:file "cli")))
+  :components ((:file "src/package")
+               (:file "src/model")
+               (:file "src/parse")
+               (:file "src/gopher")
+               (:file "src/gemini")
+               (:file "src/html")
+               (:file "src/tripod")
+               (:file "src/cli")))
