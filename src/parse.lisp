@@ -58,7 +58,7 @@ The backend to use, if not provided, is inferred based on the
 (let ((file->tripod (make-hash-table :test #'equalp)))
   (defgeneric file->tripod (file backend &key &allow-other-keys)
     (:method :around ((file t) (backend t) &key &allow-other-keys)
-      (uiop:ensure-gethash (list file backend) file->tripod (call-next-method)))
+      (alexandria:ensure-gethash (list file backend) file->tripod (call-next-method)))
     (:method ((file t) (backend t) &key &allow-other-keys)
       nil)
     (:method ((file t) (backend null) &key &allow-other-keys)
