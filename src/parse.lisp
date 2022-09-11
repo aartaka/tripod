@@ -55,14 +55,17 @@ The backend to use, if not provided, is inferred based on the
 `*current-backend*'."
   (tripod->backend (uiop:ensure-list nodes) backend))
 
-(defgeneric file->tripod (file backend &key &allow-other-keys)
-  (:method ((file t) (backend t) &key &allow-other-keys)
-    nil)
-  (:method ((file t) (backend null) &key &allow-other-keys)
-    (file->tripod file (path-backend file)))
-  (:method ((file string) (backend t) &key &allow-other-keys)
-    (file->tripod (uiop:parse-native-namestring file) backend))
-  (:documentation "Get the contents of a file as a list of tripod nodes.
+(let ((file->tripod (make-hash-table :test #'equalp)))
+  (defgeneric file->tripod (file backend &key &allow-other-keys)
+    (:method :around ((file t) (backend t) &key &allow-other-keys)
+      (uiop:ensure-gethash (list file backend) file->tripod (call-next-method)))
+    (:method ((file t) (backend t) &key &allow-other-keys)
+      nil)
+    (:method ((file t) (backend null) &key &allow-other-keys)
+      (file->tripod file (path-backend file)))
+    (:method ((file string) (backend t) &key &allow-other-keys)
+      (file->tripod (uiop:parse-native-namestring file) backend))
+    (:documentation "Get the contents of a file as a list of tripod nodes.
 
 BACKEND should be eql-specified, like (eql +gemini+), where +gemini+
 is some eql keyword variable.
@@ -70,7 +73,7 @@ is some eql keyword variable.
 If BACKEND is passed in as nil, it's being guessed automatically.
 
 The only thing left for backends to define is how the data is fetched
-based on the backend."))
+based on the backend.")))
 
 (defun file->tripod* (file &optional (backend *current-backend*))
   "Get the contents of a file as a list of tripod nodes.
@@ -78,41 +81,44 @@ The backend to use, if not provided, is inferred based on the
 `*current-backend*'."
   (file->tripod file backend))
 
-(defgeneric directory->tripod (directory backend &key &allow-other-keys)
-  (:method ((directory t) (backend t) &key &allow-other-keys)
-    nil)
-  (:method ((directory string) (backend t) &key &allow-other-keys)
-    (directory->tripod (uiop:parse-native-namestring directory) backend))
-  (:method ((directory pathname) (backend t) &key &allow-other-keys)
-    (flet ((directory-name (dir)
-             (alexandria:lastcar
-              (remove-if #'uiop:emptyp
-                         (uiop:split-string
-                          (directory-namestring dir)
-                          :separator "/")))))
-      (append
-       (list (make-instance 'heading
-                            :level 1
-                            :text (format nil "~:(~a~)" (or (directory-name directory) "root"))))
-       (if (or (uiop:subdirectories directory)
-               (uiop:directory-files directory))
-           (append
-            (loop for dir in (sort (uiop:subdirectories directory)
-                                   #'< :key #'uiop:safe-file-write-date)
-                  collect (make-instance 'link
-                                         :href (quri:uri (uiop:strcat (directory-name dir) "/"))
-                                         :text (directory-name dir)))
-            (loop for file in (sort (uiop:directory-files directory)
-                                    #'< :key #'uiop:safe-file-write-date)
-                  collect (make-instance 'link
-                                         :href (quri:uri (pathname-name file))
-                                         :text (or (ignore-errors
-                                                    (text (find-if (lambda (n) (and (eq (type-of n) 'heading)
-                                                                                    (= 1 (level n))))
-                                                                   (file->tripod file nil))))
-                                                   (pathname-name file)))))
-         (list (make-instance 'paragraph :text "This directory is empty..."))))))
-  (:documentation "Get the contents of a directory as a list of tripod nodes."))
+(let ((directory->tripod (make-hash-table :test #'equalp)))
+  (defgeneric directory->tripod (directory backend &key &allow-other-keys)
+    (:method :around ((directory t) (backend t) &key &allow-other-keys)
+      (alexandria:ensure-gethash directory directory->tripod (call-next-method)))
+    (:method ((directory t) (backend t) &key &allow-other-keys)
+      nil)
+    (:method ((directory string) (backend t) &key &allow-other-keys)
+      (directory->tripod (uiop:parse-native-namestring directory) backend))
+    (:method ((directory pathname) (backend t) &key &allow-other-keys)
+      (flet ((directory-name (dir)
+               (alexandria:lastcar
+                (remove-if #'uiop:emptyp
+                           (uiop:split-string
+                            (directory-namestring dir)
+                            :separator "/")))))
+        (append
+         (list (make-instance 'heading
+                              :level 1
+                              :text (format nil "~:(~a~)" (or (directory-name directory) "root"))))
+         (if (or (uiop:subdirectories directory)
+                 (uiop:directory-files directory))
+             (append
+              (loop for dir in (sort (uiop:subdirectories directory)
+                                     #'< :key #'uiop:safe-file-write-date)
+                    collect (make-instance 'link
+                                           :href (quri:uri (uiop:strcat (directory-name dir) "/"))
+                                           :text (directory-name dir)))
+              (loop for file in (sort (uiop:directory-files directory)
+                                      #'< :key #'uiop:safe-file-write-date)
+                    collect (make-instance 'link
+                                           :href (quri:uri (pathname-name file))
+                                           :text (or (ignore-errors
+                                                      (text (find-if (lambda (n) (and (eq (type-of n) 'heading)
+                                                                                      (= 1 (level n))))
+                                                                     (file->tripod file nil))))
+                                                     (pathname-name file)))))
+             (list (make-instance 'paragraph :text "This directory is empty..."))))))
+    (:documentation "Get the contents of a directory as a list of tripod nodes.")))
 
 (defun directory->tripod* (directory &optional (backend *current-backend*))
   "Get the contents of the DIRECTORY as a list of tripod nodes.
