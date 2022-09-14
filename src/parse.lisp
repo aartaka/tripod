@@ -60,7 +60,7 @@ The backend to use, if not provided, is inferred based on the
 
 (defgeneric file->tripod (file backend &key &allow-other-keys)
   (:method :around ((file t) (backend t) &key &allow-other-keys)
-    (let ((*current-path* path))
+    (let ((*current-path* file))
       (call-next-method)))
   (:method ((file t) (backend t) &key &allow-other-keys)
     nil)
@@ -133,10 +133,9 @@ The backend to use, if not provided, is inferred based on the
   "Get the contents of the PATH (file or directory) as a list of tripod nodes.
 The backend to use, if not provided, is inferred based on the
 `*current-backend*'."
-  (let ((*current-path* path))
-    (if (uiop:directory-pathname-p path)
-       (directory->tripod path backend)
-       (file->tripod path backend))))
+  (if (uiop:directory-pathname-p path)
+      (directory->tripod path backend)
+      (file->tripod path backend)))
 
 (defun path->backend (path &optional (backend *current-backend*))
   (if (eq (path-backend path) backend)
