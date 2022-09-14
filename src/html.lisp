@@ -102,6 +102,9 @@
         (let ((description (plump:make-element head "meta")))
           (plump:set-attribute description "name" "description")
           (plump:set-attribute description "content" (text first-paragraph))))
+      (let ((viewport (plump:make-element head "meta")))
+        (plump:set-attribute viewport "name" "viewport")
+        (plump:set-attribute description "content" "width=device-width, initial-scale=1.0"))
       (when header-contents
         (loop for header-elem across (plump:children header-contents)
               do (plump:append-child header header-elem)))
