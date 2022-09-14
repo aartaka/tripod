@@ -59,6 +59,9 @@ The backend to use, if not provided, is inferred based on the
   (tripod->backend (uiop:ensure-list nodes) backend))
 
 (defgeneric file->tripod (file backend &key &allow-other-keys)
+  (:method :around ((file t) (backend t) &key &allow-other-keys)
+    (let ((*current-path* path))
+      (call-next-method)))
   (:method ((file t) (backend t) &key &allow-other-keys)
     nil)
   (:method ((file t) (backend null) &key &allow-other-keys)
@@ -82,6 +85,9 @@ The backend to use, if not provided, is inferred based on the
   (file->tripod file backend))
 
 (defgeneric directory->tripod (directory backend &key &allow-other-keys)
+  (:method :around ((directory t) (backend t) &key &allow-other-keys)
+    (let ((*current-path* directory))
+      (call-next-method)))
   (:method ((directory t) (backend t) &key &allow-other-keys)
     nil)
   (:method ((directory string) (backend t) &key &allow-other-keys)
@@ -121,8 +127,7 @@ The backend to use, if not provided, is inferred based on the
   "Get the contents of the DIRECTORY as a list of tripod nodes.
 The backend to use, if not provided, is inferred based on the
 `*current-backend*'."
-  (let ((*current-path* path))
-    (directory->tripod directory backend)))
+  (directory->tripod directory backend))
 
 (defun path->tripod* (path &optional (backend *current-backend*))
   "Get the contents of the PATH (file or directory) as a list of tripod nodes.
@@ -134,10 +139,9 @@ The backend to use, if not provided, is inferred based on the
        (file->tripod path backend))))
 
 (defun path->backend (path &optional (backend *current-backend*))
-  (let ((*current-path* path))
-    (if (eq (path-backend path) backend)
-        (uiop:read-file-string path)
-        (tripod->backend (path->tripod* path (path-backend path)) backend))))
+  (if (eq (path-backend path) backend)
+      (uiop:read-file-string path)
+      (tripod->backend (path->tripod* path (path-backend path)) backend)))
 
 (defmethod resolve-path ((file pathname) &optional (current-path (tripod-directory)))
   (let* ((current-path (if (uiop:absolute-pathname-p current-path)
