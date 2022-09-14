@@ -13,6 +13,7 @@
    #:preformatted
    ;; parse.lisp
    #:tripod-directory
+   #:*current-path*
    #:*mime->backend*
    #:*backend->mime*
    #:path-backend
