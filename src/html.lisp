@@ -73,7 +73,7 @@
 
 ;;; Tripod to Backend conversion.
 
-(defmethod tripod->backend ((nodes list) (backend (eql +html+)) &key (current-path *current-path*) &allow-other-keys)
+(defmethod tripod->backend ((nodes list) (backend (eql +html+)) &key)
   (flet ((read-of-create (template parent element)
            (if template
                (elt (clss:select element parent) 0)
