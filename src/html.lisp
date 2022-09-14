@@ -73,13 +73,17 @@
 
 ;;; Tripod to Backend conversion.
 
-(defmethod tripod->backend ((nodes list) (backend (eql +html+)) &key)
+(defmethod tripod->backend ((nodes list) (backend (eql +html+)) &key (current-path *current-path*) &allow-other-keys)
   (flet ((read-of-create (template parent element)
            (if template
                (elt (clss:select element parent) 0)
                (plump:make-element parent element)))
          (make-with-text (parent tag text)
-           (plump:make-text-node (plump:make-element parent tag) text)))
+           (plump:make-text-node (plump:make-element parent tag) text))
+         (make-meta (head name content)
+           (let ((meta (plump:make-element head "meta")))
+             (plump:set-attribute meta "name" name)
+             (plump:set-attribute meta "content" content))))
     (let* ((template (ignore-errors (plump:parse (resolve-path "template.html"))))
            (root (or template (plump:make-root)))
            (head (read-of-create template root "head"))
@@ -98,13 +102,16 @@
                                      nodes)))
       (when first-heading-1
         (plump:make-text-node (plump:make-element head "title") (text first-heading-1)))
+      (make-meta head "viewport" "width=device-width, initial-scale=1.0")
+      (when *current-path*
+        (let ((date-string
+                (local-time:format-timestring
+                 nil (local-time:universal-to-timestamp (file-write-date *current-path*)))))
+          (make-meta head "dcterms.modified" date-string)
+          (make-meta head "dcterms.available" date-string)
+          (make-meta head "dcterms.issued" date-string)))
       (when first-paragraph
-        (let ((description (plump:make-element head "meta")))
-          (plump:set-attribute description "name" "description")
-          (plump:set-attribute description "content" (text first-paragraph))))
-      (let ((viewport (plump:make-element head "meta")))
-        (plump:set-attribute viewport "name" "viewport")
-        (plump:set-attribute description "content" "width=device-width, initial-scale=1.0"))
+        (make-meta head "description" (text first-paragraph)))
       (when header-contents
         (loop for header-elem across (plump:children header-contents)
               do (plump:append-child header header-elem)))

@@ -9,7 +9,7 @@
   :build-operation "program-op"
   :build-pathname "tripod"
   :entry-point "tripod:entry-point"
-  :depends-on (#:alexandria #:trivial-mimes
+  :depends-on (#:alexandria #:trivial-mimes #:local-time
                #:hunchentoot #:cl-gopher #:phos #:plump #:clss #:cl-markdown)
   :components ((:file "src/package")
                (:file "src/model")
