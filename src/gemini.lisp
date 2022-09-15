@@ -144,7 +144,7 @@
              (alexandria:with-input-from-file (f (resolve-path "header.gmi"))
                (phos/gemtext:parse f)))
            nil))
-         (write-to-bytes (path->backend path :gemini))
+         (write-to-bytes (path->backend* path :gemini))
          (write-to-bytes
           (phos/gemtext:unparse
            (when (resolve-path "footer.gmi")

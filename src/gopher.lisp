@@ -159,7 +159,7 @@ ALWAYS returns a list, even if there's just one string in it."
                (path (resolve-path path))
                (*address* (hunchentoot:acceptor-address acceptor))
                (*port* (hunchentoot:acceptor-port acceptor))
-               (text (path->backend path :gopher)))
+               (text (path->backend* path :gopher)))
           (hunchentoot:log-message* :info "Gopher path: ~a" path)
           (write-sequence text (usocket:socket-stream socket))
           (write-line "." (usocket:socket-stream socket))

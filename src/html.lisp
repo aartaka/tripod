@@ -160,7 +160,7 @@
   (alexandria:when-let* ((path (ignore-errors (resolve-path script-name))))
     (setf (hunchentoot:content-type*) "text/html;charset=utf8")
     (let ((out (hunchentoot:send-headers))
-          (content (path->backend path :html)))
+          (content (path->backend* path :html)))
       (write-sequence (flex:string-to-octets content :external-format :utf8) out))
     t))
 
@@ -170,7 +170,7 @@
   (let* ((out (hunchentoot:send-headers))
          (404-path (resolve-path "404"))
          (content (if 404-path
-                      (path->backend 404-path :html)
+                      (path->backend* 404-path :html)
                       (tripod->backend
                        (list (make-instance 'heading :level 1 :text "Sorry, there's no such page")
                              (make-instance

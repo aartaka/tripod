@@ -137,11 +137,20 @@ The backend to use, if not provided, is inferred based on the
       (directory->tripod path backend)
       (file->tripod path backend)))
 
-(defun path->backend (path &optional (backend *current-backend*))
+(defgeneric path->backend (path backend &key &allow-other-keys)
+  (:method ((path pathname) backend &key &allow-other-keys)
+    (tripod->backend (path->tripod* path (path-backend path)) backend))
+  (:documentation "Transforms the PATH to the the BACKEND-friendly format.
+
+The default action is the most sensible (it transforms the file to
+Tripod and the to the BACKEND-specific format), you should only
+redefine it if you need to skip the Tripod transformation step."))
+
+(defun path->backend* (path &optional (backend *current-backend*))
   (let ((*current-path* path))
     (if (eq (path-backend path) backend)
         (uiop:read-file-string path)
-        (tripod->backend (path->tripod* path (path-backend path)) backend))))
+        (path->backend path backend))))
 
 (defmethod resolve-path ((file pathname) &optional (current-path (tripod-directory)))
   (let* ((current-path (if (uiop:absolute-pathname-p current-path)
