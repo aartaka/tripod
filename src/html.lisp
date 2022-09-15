@@ -182,7 +182,10 @@ Please, check the address again."))
 
 (hunchentoot:define-easy-handler
     (process-files
-     :uri (constantly t)
+     :uri (lambda (request)
+            (uiop:emptyp
+             (pathname-type
+              (quri:uri-path (quri:uri (hunchentoot:request-uri request))))))
      :default-request-type :get)
     ()
   (or
