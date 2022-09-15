@@ -14,6 +14,14 @@
 (defun tripod-directory ()
   (or *tripod-directory* (uiop:getcwd)))
 
+(defun relative-path (pathname &optional (relative-to (tripod-directory)))
+  (let ((relative-to (uiop:directory-exists-p relative-to))
+        (pathname (if (uiop:directory-pathname-p pathname)
+                             (uiop:directory-exists-p pathname)
+                             (uiop:file-exists-p pathname))))
+    (when (and relative-to (zerop (search (namestring relative-to) (namestring pathname))))
+      (pathname (subseq (namestring pathname) (length (namestring relative-to)))))))
+
 (defvar *mime->backend* (make-hash-table :test #'equal)
   "The map from backend-specific MIME type to the backend that processes it.")
 
