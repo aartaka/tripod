@@ -93,15 +93,10 @@
            (main (read-of-create template body "main"))
            (footer (read-of-create template body "footer"))
            (footer-contents (ignore-errors (plump:parse (resolve-path "footer.html"))))
-           (first-paragraph (find-if (lambda (node)
-                                       (and (typep node 'paragraph)
-                                            (not (uiop:emptyp (text node)))))
-                                     nodes))
-           (first-heading-1 (find-if (lambda (n) (and (eq (type-of n) 'heading)
-                                                      (= 1 (level n))))
-                                     nodes)))
-      (when first-heading-1
-        (plump:make-text-node (plump:make-element head "title") (text first-heading-1)))
+           (first-paragraph (first-paragraph nodes))
+           (title (title nodes)))
+      (when title
+        (plump:make-text-node (plump:make-element head "title") (text title)))
       (make-meta head "viewport" "width=device-width, initial-scale=1.0")
       (when *current-path*
         (let ((date-string
@@ -183,9 +178,7 @@ Please, check the address again."))
 (hunchentoot:define-easy-handler
     (process-files
      :uri (lambda (request)
-            (uiop:emptyp
-             (pathname-type
-              (quri:uri-path (quri:uri (hunchentoot:request-uri request))))))
+            (uiop:emptyp (pathname-type (hunchentoot:script-name request))))
      :default-request-type :get)
     ()
   (or

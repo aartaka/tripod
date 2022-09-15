@@ -189,3 +189,20 @@ redefine it if you need to skip the Tripod transformation step."))
                   path)))
         (or (resolve-path (pathname clean-path) current-path)
             (resolve-path (pathname (uiop:strcat clean-path "/")) current-path)))))
+
+(defmethod title ((nodes list))
+  (find-if (lambda (n) (and (eq (type-of n) 'heading)
+                            (= 1 (level n))))
+           nodes))
+
+(defmethod title ((path pathname))
+  (title (path->tripod* path (path-backend path))))
+
+(defmethod first-paragraph ((nodes list))
+  (find-if (lambda (node)
+             (and (typep node 'paragraph)
+                  (not (uiop:emptyp (text node)))))
+           nodes))
+
+(defmethod first-paragraph ((path pathname))
+  (first-paragraph (path->tripod* path (path-backend path))))
