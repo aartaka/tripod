@@ -171,17 +171,14 @@ redefine it if you need to skip the Tripod transformation step."))
                   "index")
                  (t (pathname-name file))))
          (file (if name
-                   (find-if
-                    (lambda (f)
-                      (and (string-equal (pathname-name f) name)
-                           (if (pathname-type file)
-                               (string-equal (pathname-type f)
-                                             (pathname-type file))
-                               t)))
+                   (find
+                    name
                     (uiop:directory-files
                      (uiop:merge-pathnames*
                       (uiop:pathname-directory-pathname file)
-                      current-path)))
+                      current-path))
+                    :key #'pathname-name
+                    :test #'string-equal)
                    ;; Directory
                    (when (uiop:directory-exists-p (uiop:merge-pathnames* file current-path))
                      (uiop:merge-pathnames* file current-path)))))
