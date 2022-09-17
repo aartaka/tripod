@@ -73,13 +73,14 @@
      :uri (lambda (request)
             (and
              (eq :get (hunchentoot:request-method request))
-             (string-equal "json" (pathname-type (hunchentoot:script-name request)))
-             (member
-              (hunchentoot:header-in "Accept" request)
-              '("application/json"
-                "application/ld+json"
-                "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"")
-              :test #'string-equal)))
+             (or
+              (string-equal "json" (pathname-type (hunchentoot:script-name request)))
+              (member
+               (hunchentoot:header-in "Accept" request)
+               '("application/json"
+                 "application/ld+json"
+                 "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"")
+               :test #'string-equal))))
      :default-request-type :get)
     ()
   (alexandria:when-let* ((path (ignore-errors (resolve-path (hunchentoot:script-name*)))))
