@@ -73,17 +73,14 @@
 (hunchentoot:define-easy-handler
     (serve-ap-content
      :uri (lambda (request)
-            (and
-             (eq :get (hunchentoot:request-method request))
-             (or
-              (string-equal "json" (pathname-type (hunchentoot:script-name request)))
-              (member
-               (hunchentoot:header-in "Accept" request)
-               '("application/json"
-                 "application/ld+json"
-                 "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"")
-               :test #'string-equal))))
-     :default-request-type :get)
+            (or
+             (string-equal "json" (pathname-type (hunchentoot:script-name request)))
+             (member
+              (hunchentoot:header-in "Accept" request)
+              '("application/json"
+                "application/ld+json"
+                "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"")
+              :test #'string-equal))))
     ()
   (hunchentoot:log-message* :info "Got an ActivityPub request for ~a" (hunchentoot:script-name*))
   (alexandria:when-let* ((path (ignore-errors (resolve-path (hunchentoot:script-name*)))))
