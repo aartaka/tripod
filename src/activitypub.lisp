@@ -88,5 +88,6 @@
           "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"")
     (let ((out (hunchentoot:send-headers))
           (content (path->backend path :ap)))
+      (hunchentoot:log-message* :info "Headers sent")
       (write-sequence (flex:string-to-octets content :external-format :utf8) out))
     t))
