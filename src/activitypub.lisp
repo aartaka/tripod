@@ -12,19 +12,18 @@
 
 (defun file->ap (path)
   (let* ((modification-time (file-write-date path))
-         (timestring (local-time:format-timestring
-                      nil (local-time:universal-to-timestamp modification-time)))
+         (timestamp (local-time:universal-to-timestamp modification-time))
          (title (text (title path)))
          (description (text (first-paragraph path))))
     (nactivitypub:unparse-object
      (make-instance 'nactivitypub:article
                     :name title
                     :summary description
-                    :published timestring
-                    :updated timestring
+                    :published timestamp
+                    :updated timestamp
                     :to '("https://www.w3.org/ns/activitystreams#Public")
                     :content (plump:serialize
-                              (elt (clss:select "body" (path->backend path :html)) 0)
+                              (elt (clss:select "body" (plump:parse (path->backend path :html))) 0)
                               nil)
                     :id (let ((json-path (uiop:make-pathname*
                                           :name (pathname-name path)
@@ -32,23 +31,24 @@
                                           :defaults (relative-path path))))
                           (quri:render-uri
                            (quri:copy-uri
-                            (quri:uri (hunchentoot:request-uri*))
+                            (quri:uri "https://aartaka.me/blog/design-for-exploitation.gmi"
+                                      ;;(hunchentoot:request-uri*)
+                                      )
                             :path (namestring json-path))))))))
 
 (defun directory->ap (path)
   (let* ((subdirs (uiop:subdirectories path))
          (files (uiop:directory-files path))
          (modification-time (file-write-date path))
-         (timestring (local-time:format-timestring
-                      nil (local-time:universal-to-timestamp modification-time)))
+         (timestamp (local-time:universal-to-timestamp modification-time))
          (title (text (title path)))
          (description (text (first-paragraph path))))
     (nactivitypub:unparse-object
      (make-instance 'nactivitypub:collection
                     :name title
                     :summary description
-                    :published timestring
-                    :updated timestring
+                    :published timestamp
+                    :updated timestamp
                     :to '("https://www.w3.org/ns/activitystreams#Public")
                     :total-items (+ (length subdirs)
                                     (length files))
