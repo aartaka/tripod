@@ -10,12 +10,15 @@
   :build-pathname "tripod"
   :entry-point "tripod:entry-point"
   :depends-on (#:alexandria #:trivial-mimes #:local-time
-               #:hunchentoot #:cl-gopher #:phos #:plump #:clss #:cl-markdown)
+               #:hunchentoot
+               #:cl-gopher #:phos #:plump #:clss #:cl-markdown
+               #:nactivitypub #:njson)
   :components ((:file "src/package")
                (:file "src/model")
                (:file "src/parse")
                (:file "src/gopher")
                (:file "src/gemini")
                (:file "src/html")
+               (:file "src/activitypub")
                (:file "src/tripod")
                (:file "src/cli")))
