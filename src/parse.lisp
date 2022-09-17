@@ -188,10 +188,14 @@ redefine it if you need to skip the Tripod transformation step."))
   (declare (ignorable current-path))
   (if (member path '("/" "" "index") :test #'string-equal)
       (resolve-path (pathname "index"))
-      (let ((clean-path
-              (if (char= #\/ (elt path 0))
-                  (subseq path 1)
-                  path)))
+      (let* ((clean-path
+               ;; Remove leading slash
+               (if (char= #\/ (elt path 0))
+                   (subseq path 1)
+                   path))
+             ;; Remove the pathname type.
+             (clean-path
+               (namestring (uiop:make-pathname* :type nil :defaults (pathname clean-path)))))
         (or (resolve-path (pathname clean-path) current-path)
             (resolve-path (pathname (uiop:strcat clean-path "/")) current-path)))))
 
