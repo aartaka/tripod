@@ -16,23 +16,24 @@
                       nil (local-time:universal-to-timestamp modification-time)))
          (title (text (title path)))
          (description (text (first-paragraph path))))
-    (make-instance 'nactivitypub:article
-                   :name title
-                   :summary description
-                   :published timestring
-                   :updated timestring
-                   :to '("https://www.w3.org/ns/activitystreams#Public")
-                   :content (plump:serialize
-                             (elt (clss:select "body" (path->backend path :html)) 0)
-                             nil)
-                   :id (let ((json-path (uiop:make-pathname*
-                                         :name (pathname-name path)
-                                         :type "json"
-                                         :defaults (relative-path path))))
-                         (quri:render-uri
-                          (quri:copy-uri
-                           (quri:uri (hunchentoot:request-uri*))
-                           :path (namestring json-path)))))))
+    (nactivitypub:unparse-object
+     (make-instance 'nactivitypub:article
+                    :name title
+                    :summary description
+                    :published timestring
+                    :updated timestring
+                    :to '("https://www.w3.org/ns/activitystreams#Public")
+                    :content (plump:serialize
+                              (elt (clss:select "body" (path->backend path :html)) 0)
+                              nil)
+                    :id (let ((json-path (uiop:make-pathname*
+                                          :name (pathname-name path)
+                                          :type "json"
+                                          :defaults (relative-path path))))
+                          (quri:render-uri
+                           (quri:copy-uri
+                            (quri:uri (hunchentoot:request-uri*))
+                            :path (namestring json-path))))))))
 
 (defun directory->ap (path)
   (let* ((subdirs (uiop:subdirectories path))
@@ -42,24 +43,25 @@
                       nil (local-time:universal-to-timestamp modification-time)))
          (title (text (title path)))
          (description (text (first-paragraph path))))
-    (make-instance 'nactivitypub:collection
-                   :name title
-                   :summary description
-                   :published timestring
-                   :updated timestring
-                   :to '("https://www.w3.org/ns/activitystreams#Public")
-                   :total-items (+ (length subdirs)
-                                   (length files))
-                   :items (mapcar (lambda (p) (path->backend p :ap))
-                                  (append subdirs files))
-                   :id (let* ((relative (namestring (relative-path path)))
-                              (relative (if (uiop:string-suffix-p relative "/")
-                                            (subseq relative 0 (1- (length relative)))
-                                            relative)))
-                         (quri:render-uri
-                          (quri:copy-uri
-                           (quri:uri (hunchentoot:request-uri*))
-                           :path (concatenate 'string relative ".json")))))))
+    (nactivitypub:unparse-object
+     (make-instance 'nactivitypub:collection
+                    :name title
+                    :summary description
+                    :published timestring
+                    :updated timestring
+                    :to '("https://www.w3.org/ns/activitystreams#Public")
+                    :total-items (+ (length subdirs)
+                                    (length files))
+                    :items (mapcar (lambda (p) (path->backend p :ap))
+                                   (append subdirs files))
+                    :id (let* ((relative (namestring (relative-path path)))
+                               (relative (if (uiop:string-suffix-p relative "/")
+                                             (subseq relative 0 (1- (length relative)))
+                                             relative)))
+                          (quri:render-uri
+                           (quri:copy-uri
+                            (quri:uri (hunchentoot:request-uri*))
+                            :path (concatenate 'string relative ".json"))))))))
 
 (defmethod path->backend ((path pathname) (backend (eql +ap+)) &key &allow-other-keys)
   (if (uiop:directory-pathname-p path)
