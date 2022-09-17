@@ -31,9 +31,7 @@
                                           :defaults (relative-path path))))
                           (quri:render-uri
                            (quri:copy-uri
-                            (quri:uri "https://aartaka.me/blog/design-for-exploitation.gmi"
-                                      ;;(hunchentoot:request-uri*)
-                                      )
+                            (quri:uri (hunchentoot:request-uri*))
                             :path (namestring json-path))))))))
 
 (defun directory->ap (path)
