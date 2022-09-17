@@ -82,6 +82,7 @@
     ()
   (hunchentoot:log-message* :info "Got an ActivityPub request for ~a" (hunchentoot:script-name*))
   (alexandria:when-let* ((path (ignore-errors (resolve-path (hunchentoot:script-name*)))))
+    (hunchentoot:log-message* :info "Path resolved: ~a" path)
     (setf (hunchentoot:content-type*)
           "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"")
     (let ((out (hunchentoot:send-headers))
