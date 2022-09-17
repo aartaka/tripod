@@ -83,6 +83,7 @@
                :test #'string-equal))))
      :default-request-type :get)
     ()
+  (hunchentoot:log-message* "Got an ActivityPub request for ~a" (hunchentoot:script-name*))
   (alexandria:when-let* ((path (ignore-errors (resolve-path (hunchentoot:script-name*)))))
     (setf (hunchentoot:content-type*)
           "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"")
