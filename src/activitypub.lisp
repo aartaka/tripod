@@ -39,8 +39,10 @@
          (files (uiop:directory-files path))
          (modification-time (file-write-date path))
          (timestamp (local-time:universal-to-timestamp modification-time))
-         (title (text (title path)))
-         (description (text (first-paragraph path))))
+         (title (and (title path)
+                     (text (title path))))
+         (description (and (first-paragraph path)
+                           (text (first-paragraph path)))))
     (nactivitypub:unparse-object
      (make-instance 'nactivitypub:collection
                     :name title
