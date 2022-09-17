@@ -23,7 +23,7 @@
                     :updated timestamp
                     :to '("https://www.w3.org/ns/activitystreams#Public")
                     :content (plump:serialize
-                              (elt (clss:select "body" (plump:parse (path->backend path :html))) 0)
+                              (elt (clss:select "main" (plump:parse (path->backend path :html))) 0)
                               nil)
                     :id (let ((json-path (uiop:make-pathname*
                                           :name (pathname-name path)
