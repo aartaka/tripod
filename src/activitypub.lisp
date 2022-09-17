@@ -5,6 +5,8 @@
 (defvar +ap+ :ap)
 
 ;; TODO: Maybe also modify the MIME hash table to associate JSON with ActivityStreams?
+(setf (gethash "application/json" *mime->backend*) +ap+)
+(setf (gethash "application/ld+json" *mime->backend*) +ap+)
 (setf (gethash "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"" *mime->backend*) +ap+)
 (setf (gethash +ap+ *backend->mime*) "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"")
 
