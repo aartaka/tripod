@@ -70,6 +70,15 @@
 
 ;;; Acceptor (using the http(s) one)
 
+(defun respond-json-page ()
+  (alexandria:when-let* ((path (ignore-errors (resolve-path (hunchentoot:script-name*)))))
+    (setf (hunchentoot:content-type*)
+          "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"")
+    (let ((out (hunchentoot:send-headers))
+          (content (path->backend path :ap)))
+      (write-sequence (flex:string-to-octets content :external-format :utf8) out))
+    t))
+
 (hunchentoot:define-easy-handler
     (serve-ap-content
      :uri (lambda (request)
@@ -82,13 +91,5 @@
                 "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"")
               :test #'string-equal))))
     ()
-  (hunchentoot:log-message* :info "Got an ActivityPub request for ~a" (hunchentoot:script-name*))
-  (alexandria:when-let* ((path (ignore-errors (resolve-path (hunchentoot:script-name*)))))
-    (hunchentoot:log-message* :info "Path resolved: ~a" path)
-    (setf (hunchentoot:content-type*)
-          "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"")
-    (let ((out (hunchentoot:send-headers))
-          (content (path->backend path :ap)))
-      (hunchentoot:log-message* :info "Headers sent")
-      (write-sequence (flex:string-to-octets content :external-format :utf8) out))
-    t))
+  (case (hunchentoot:request-method*)
+    (:get (respond-json-page))))
