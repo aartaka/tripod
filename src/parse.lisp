@@ -20,7 +20,8 @@
                              (uiop:directory-exists-p pathname)
                              (uiop:file-exists-p pathname))))
     (when (and relative-to (zerop (search (namestring relative-to) (namestring pathname))))
-      (pathname (subseq (namestring pathname) (length (namestring relative-to)))))))
+      (make-pathname :defaults (subseq (namestring pathname) (length (namestring relative-to)))
+                     :type nil))))
 
 (defvar *mime->backend* (make-hash-table :test #'equal)
   "The map from backend-specific MIME type to the backend that processes it.")
