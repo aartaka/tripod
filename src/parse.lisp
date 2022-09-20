@@ -119,15 +119,13 @@ The backend to use, if not provided, is inferred based on the
                                    #'< :key #'uiop:safe-file-write-date)
                   collect (make-instance
                            'link
-                           :href (quri:uri (namestring (relative-path
-                                                        dir (resolve-path (hunchentoot:script-name*)))))
+                           :href (quri:uri (uiop:strcat "/" (namestring (relative-path dir))))
                            :text (directory-name dir)))
             (loop for file in (sort (uiop:directory-files directory)
                                     #'< :key #'uiop:safe-file-write-date)
                   collect (make-instance
                            'link
-                           :href (quri:uri (namestring (relative-path
-                                                        file (resolve-path (hunchentoot:script-name*)))))
+                           :href (quri:uri (uiop:strcat "/" (namestring (relative-path dir))))
                            :text (or (ignore-errors
                                       (text (find-if (lambda (n) (and (eq (type-of n) 'heading)
                                                                       (= 1 (level n))))
