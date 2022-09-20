@@ -141,5 +141,7 @@ Special files:
         (mapcar #'hunchentoot:stop acceptors)
         (uiop:quit))
       (error (c)
+        (when (find-restart 'continue)
+          (invoke-restart 'continue))
         (format t "An unknown error occured:~&~a~&" c)
         (uiop:print-backtrace :condition c)))))
