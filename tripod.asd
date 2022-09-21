@@ -20,5 +20,4 @@
                (:file "src/gemini")
                (:file "src/html")
                (:file "src/activitypub")
-               (:file "src/tripod")
                (:file "src/cli")))
